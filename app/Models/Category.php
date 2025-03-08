@@ -17,4 +17,9 @@ class Category extends Model{
             $insight -> slug = Str::slug($insight -> judul, '-');
         });
     }
+
+    public function insights()
+    {
+        return $this->hasMany(Insight::class);
+    }
 }

@@ -49,4 +49,19 @@ class InsightController extends Controller
             'message' => 'Insight berhasil dihapus'
         ], 200);
     }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $insights = $this->insightService->searchInsights($query);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $insights,
+            'meta' => [
+                'count' => count($insights),
+                'query' => $query
+            ]
+        ]);
+    }
 }

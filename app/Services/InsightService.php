@@ -123,4 +123,31 @@ class InsightService
         $insight->delete();
         return ['message' => 'Insight berhasil dihapus'];
     }
+
+    /**
+     * Search for insights based on a query string
+     * @param string $query
+     * @return array
+     */
+    public function searchInsights($query)
+    {
+        return Insight::with('category')
+            ->where('judul', 'like', "%{$query}%")
+            ->orWhere('isi', 'like', "%{$query}%")
+            ->orWhere('penulis', 'like', "%{$query}%")
+            ->get()
+            ->map(function ($insight) {
+                return [
+                    'id' => $insight->id,
+                    'judul' => $insight->judul,
+                    'slug' => $insight->slug,
+                    'isi' => $insight->isi,
+                    'image_url' => $insight->image_url,
+                    'penulis' => $insight->penulis,
+                    'TanggalTerbit' => $insight->TanggalTerbit,
+                    'category_id' => $insight->category_id,
+                    'category_name' => $insight->category ? $insight->category->name : null,
+                ];
+            });
+    }
 }
