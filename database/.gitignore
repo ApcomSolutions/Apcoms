@@ -1,1 +1,5 @@
 *.sqlite*
+echo "ssh_keys/id_rsa_apcom" >> .gitignore
+echo "ssh_keys/id_rsa_apcom.pub" >> .gitignore
+git add .gitignore
+git commit -m "Ignore SSH private keys"
