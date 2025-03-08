@@ -16,18 +16,17 @@
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm">
                     {{-- Tampilkan gambar hanya jika ada --}}
-                    @if($insight->image_url)
-                        <img src="{{ $insight->image_url }}" class="card-img-top" alt="{{ $insight->judul }}">
+                    @if(isset($insight['image_url']) && $insight['image_url'])
+                        <img src="{{ $insight['image_url'] }}" class="card-img-top" alt="{{ $insight['judul'] }}">
                     @endif
                     <div class="card-body">
-                        <h5 class="card-title">{{ $insight->judul }}</h5>
-                        <p class="card-text">{{ Str::limit($insight->isi, 100) }}</p>
-                        <p class="text-muted">Penulis: {{ $insight->penulis }}</p>
-                        <p class="text-muted">Terbit: {{ \Carbon\Carbon::parse($insight->created_at)->format('Y-m-d') }}
+                        <h5 class="card-title">{{ $insight['judul'] }}</h5>
+                        <p class="card-text">{{ Str::limit($insight['isi'], 100) }}</p>
+                        <p class="text-muted">Penulis: {{ $insight['penulis'] }}</p>
+                        <p class="text-muted">Terbit: {{ \Carbon\Carbon::parse($insight['TanggalTerbit'])->format('Y-m-d') }}
                         </p>
 
-                        <a href="{{ route('insights.show', $insight->id) }}" class="btn btn-primary">Baca Selengkapnya</a>
-
+                        <a href="{{ route('insights.show', $insight['slug']) }}" class="btn btn-primary">Baca Selengkapnya</a>
                     </div>
                 </div>
             </div>
