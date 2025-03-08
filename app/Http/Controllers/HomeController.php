@@ -6,7 +6,6 @@ class HomeController
 {
 
     public function index() {
-//        return view('home', );
-        return csrf_token();
+       return view('home', );
     }
 }
