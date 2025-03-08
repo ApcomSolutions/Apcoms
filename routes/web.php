@@ -14,3 +14,8 @@ Route::get('/admin/insights', [InsightWebController::class, 'index']);
 
 
 Route::get('/admin/insights', [InsightAdminController::class, 'index'])->name('admin.insights');
+
+
+Route::get('/test', function () {
+  dd(file_exists(storage_path('app/public/img/hero.png')));
+});
