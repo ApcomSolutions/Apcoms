@@ -15,19 +15,22 @@ public function GetInsightById($id) {
     return Insight::findOrFail($id);
 }
 
-public function createInsight(Request $request) {
-    $validated = $request -> validate([
-        'judul'=> 'required|string|max:255',
-        'slug'=> 'required|string|unique:insights,slug',
-        'isi'=> 'required|string',
-        'penulis'=> 'required|string|max:255',
-        'image_url'=> 'nullable|string|max:255',
-        'TanggalTerbit'=> 'required|date',
-        'category_id'=> 'nullable|exists:categories,id',
-    ]);
+    public function createInsight(Request $request) {
+        $validated = $request->validate([
+            'judul' => 'required|string|max:255',
+            'slug' => 'required|string|unique:insights,slug',
+            'isi' => 'required|string',
+            'penulis' => 'required|string|max:255',
+            'image_url' => 'nullable|string|max:255',
+            'TanggalTerbit' => 'required|date',
+            'category_id' => 'nullable|exists:categories,id',
+        ]);
 
-    return Insight::create($validated);
-}
+        $insight = Insight::create($validated);
+
+        return $insight;  // ✅ Pastikan data dikembalikan dengan benar
+    }
+
 
 public function updateInsight(Request $request, $id) {
     $insight = Insight::findOrFail($id);

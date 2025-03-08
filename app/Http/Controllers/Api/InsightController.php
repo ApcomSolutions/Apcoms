@@ -15,28 +15,43 @@ class InsightController extends Controller
         $this->insightService = $insightService;
     }
 
-    public function index() {
-        $insights = $this->insightService->GetAllInsights();
-        return response()->json($insights);
-    }
+
+    public function showAllInsights()
+        {
+            $insights = Insight::all(); // Ambil semua data
+            return response()->json($insights);
+        }
+
+
 
     public function show($id) {
-        $insight = $this->insightService->getInsightById($id);
+        $insight = $this->insightService->GetInsightById($id);
         return response()->json($insight, 200);
     }
 
     public function store(Request $request) {
         $insight = $this->insightService->createInsight($request);
-        return response()->json($insight, 201);
+
+        return response()->json([
+            'message' => 'Insight berhasil dibuat',
+            'data' => $insight
+        ], 201);
     }
+
 
     public function update(Request $request, $id) {
         $insight = $this->insightService->updateInsight($request, $id);
-        return response()->json($insight, 200);
+        return response()->json([
+            'message' => 'Insight berhasil dirubah',
+            'data' => $insight
+        ], 200);
     }
 
     public function destroy($id) {
         $insight = $this->insightService->deleteInsight($id);
-        return response()->json($insight, 200);
+        return response()->json([
+            'message' => 'Insight berhasil dihapus',
+            'data' => $insight
+        ], 200);
     }
 }
