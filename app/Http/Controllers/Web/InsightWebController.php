@@ -16,14 +16,14 @@ class InsightWebController extends Controller
 
     public function index()
     {
-        $insights = $this->insightService->GetAllInsights(); // Ambil semua data insights
-        return view('insights.index', compact('insights')); // Kirim ke Blade
+        $insights = $this->insightService->getAllInsights(); // Standardized method name
+        return view('insights.index', compact('insights'));
     }
 
     public function show($slug)
     {
         $insightArray = $this->insightService->getInsightBySlug($slug);
-        $insight = (object) $insightArray; // Convert array to object for the detail view
+        $insight = (object) $insightArray; // Convert to object to use ->property notation
         return view('insights.detail', compact('insight'));
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class InsightService
 {
-    public function GetAllInsights() {
+    public function getAllInsights() {
         return Insight::with('category')
             ->get()
             ->map(function ($insight) {
@@ -26,6 +26,22 @@ class InsightService
             });
     }
 
+    public function getInsightById($id) {
+        $insight = Insight::with('category')->findOrFail($id);
+
+        return [
+            'id' => $insight->id,
+            'judul' => $insight->judul,
+            'slug' => $insight->slug,
+            'isi' => $insight->isi,
+            'image_url' => $insight->image_url,
+            'penulis' => $insight->penulis,
+            'TanggalTerbit' => $insight->TanggalTerbit,
+            'category_id' => $insight->category_id,
+            'category_name' => $insight->category ? $insight->category->name : null,
+        ];
+    }
+
     public function getInsightBySlug($slug) {
         $insight = Insight::with('category')->where('slug', $slug)->firstOrFail();
 
@@ -41,7 +57,6 @@ class InsightService
             'category_name' => $insight->category ? $insight->category->name : null,
         ];
     }
-
 
     public function createInsight(Request $request) {
         $validated = $request->validate([
@@ -63,15 +78,15 @@ class InsightService
         }
 
         $insight = Insight::create($insightData);
-        return $this->GetInsightById($insight->id);
+        return $this->getInsightById($insight->id);
     }
 
     public function updateInsight(Request $request, $slug) {
-        $insight = Insight::findOrFail($slug);
+        $insight = Insight::where('slug', $slug)->firstOrFail();
 
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
-            'slug' => 'required|string|unique:insights,slug,'.$slug,
+            'slug' => 'required|string|unique:insights,slug,'.$insight->id,
             'isi' => 'required|string',
             'penulis' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -93,11 +108,11 @@ class InsightService
         }
 
         $insight->update($insightData);
-        return $this->GetInsightById($insight->id);
+        return $this->getInsightById($insight->id);
     }
 
-    public function deleteInsight($id) {
-        $insight = Insight::findOrFail($id);
+    public function deleteInsight($slug) {
+        $insight = Insight::where('slug', $slug)->firstOrFail();
 
         // Hapus gambar jika ada
         if ($insight->image_url) {

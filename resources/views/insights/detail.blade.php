@@ -16,7 +16,7 @@
         <img src="{{ $insight->image_url }}" class="img-fluid mb-4" alt="{{ $insight->judul }}">
     @endif
 
-    <p>{{ $insight->isi }}</p>
+    <div>{!! $insight->isi !!}</div>
     <a href="{{ route('insights.index') }}" class="btn btn-secondary">Kembali</a>
 </div>
 

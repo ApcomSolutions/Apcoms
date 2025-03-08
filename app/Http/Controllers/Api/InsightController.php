@@ -17,7 +17,7 @@ class InsightController extends Controller
 
     public function showAllInsights()
     {
-        $insights = $this->insightService->getAllInsights(); // Ambil semua data
+        $insights = $this->insightService->getAllInsights(); // Standardized method name
         return response()->json($insights);
     }
 

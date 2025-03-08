@@ -6,6 +6,10 @@
     <title>Insight Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Trix Editor CSS and JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.min.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.min.js"></script>
 </head>
 <body class="bg-gray-100 p-6">
 
@@ -27,7 +31,9 @@
 
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600">Isi</label>
-            <textarea id="isi" rows="4" class="w-full p-2 border rounded-lg"></textarea>
+            <!-- Trix Editor -->
+            <input id="isi_content" type="hidden" name="isi">
+            <trix-editor input="isi_content" class="trix-content border rounded-lg"></trix-editor>
         </div>
 
         <div class="mb-4">
@@ -107,11 +113,13 @@
             e.preventDefault();
 
             const insightId = document.getElementById("insight_id").value;
+            const slug = document.getElementById("slug").value;
             const formData = new FormData();
 
             formData.append("judul", document.getElementById("judul").value);
             formData.append("slug", document.getElementById("slug").value);
-            formData.append("isi", document.getElementById("isi").value);
+            // Get content from Trix editor
+            formData.append("isi", document.getElementById("isi_content").value);
             formData.append("penulis", document.getElementById("penulis").value);
             formData.append("TanggalTerbit", document.getElementById("TanggalTerbit").value);
             formData.append("category_id", document.getElementById("category_id").value);
@@ -124,7 +132,7 @@
             let method = "post";
 
             if (insightId) {
-                url = `${API_URL}/${insightId}`;
+                url = `${API_URL}/${slug}`; // Use slug instead of ID for updates
                 formData.append("_method", "PUT"); // Laravel method spoofing
             }
 
@@ -160,9 +168,14 @@
     });
 
     function resetForm() {
+        // Reset standard form elements
         document.getElementById("insight-form").reset();
         document.getElementById("insight_id").value = "";
         document.getElementById("preview_image").classList.add("hidden");
+
+        // Reset Trix editor content
+        const trixEditor = document.querySelector("trix-editor");
+        trixEditor.editor.loadHTML("");
     }
 
     function toSlug(text) {
@@ -191,8 +204,11 @@
                 const tableBody = document.getElementById("insight-table-body");
                 tableBody.innerHTML = "";
                 response.data.forEach(insight => {
-                    // Truncate content for display
-                    const shortIsi = insight.isi.length > 50 ? insight.isi.substring(0, 50) + '...' : insight.isi;
+                    // Clean the HTML content for display in table
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = insight.isi;
+                    const plainText = tempDiv.textContent || tempDiv.innerText;
+                    const shortIsi = plainText.length > 50 ? plainText.substring(0, 50) + '...' : plainText;
 
                     tableBody.innerHTML += `
                         <tr class="border-b hover:bg-gray-50">
@@ -205,8 +221,8 @@
                             <td class="p-2">${insight.penulis}</td>
                             <td class="p-2">${insight.TanggalTerbit}</td>
                             <td class="p-2">
-                                <button onclick="editInsight(${insight.id})" class="bg-yellow-500 text-white px-2 py-1 rounded">Edit</button>
-                                <button onclick="deleteInsight(${insight.id})" class="bg-red-500 text-white px-2 py-1 rounded mt-1">Delete</button>
+                                <button onclick="editInsight('${insight.slug}')" class="bg-yellow-500 text-white px-2 py-1 rounded">Edit</button>
+                                <button onclick="deleteInsight('${insight.slug}')" class="bg-red-500 text-white px-2 py-1 rounded mt-1">Delete</button>
                             </td>
                         </tr>
                     `;
@@ -215,14 +231,18 @@
             .catch(error => console.error("Error fetching insights:", error));
     }
 
-    function editInsight(id) {
-        axios.get(`${API_URL}/${id}`)
+    function editInsight(slug) {
+        axios.get(`${API_URL}/${slug}`)
             .then(response => {
                 const insight = response.data;
                 document.getElementById("insight_id").value = insight.id;
                 document.getElementById("judul").value = insight.judul;
                 document.getElementById("slug").value = insight.slug;
-                document.getElementById("isi").value = insight.isi;
+
+                // Set Trix editor content
+                const trixEditor = document.querySelector("trix-editor");
+                trixEditor.editor.loadHTML(insight.isi);
+
                 document.getElementById("penulis").value = insight.penulis;
                 document.getElementById("TanggalTerbit").value = insight.TanggalTerbit;
                 document.getElementById("category_id").value = insight.category_id || '';
@@ -238,9 +258,9 @@
             .catch(error => console.error("Error fetching insight:", error));
     }
 
-    function deleteInsight(id) {
+    function deleteInsight(slug) {
         if (confirm("Apakah Anda yakin ingin menghapus insight ini?")) {
-            axios.delete(`${API_URL}/${id}`)
+            axios.delete(`${API_URL}/${slug}`)
                 .then(() => {
                     alert("Insight berhasil dihapus");
                     loadInsights();
