@@ -1,3 +1,4 @@
 <php>
     Test
+    hi
 </php>
