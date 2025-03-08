@@ -9,18 +9,15 @@
 <body>
 
 <div class="container mt-4">
-    <a href="{{ url()->previous() }}" class="btn btn-secondary mb-3">Kembali</a>
+    <h1 class="text-center">{{ $insight->judul }}</h1>
+    <p class="text-muted">Penulis: {{ $insight->penulis }} | Terbit: {{ $insight->TanggalTerbit }}</p>
 
-    <div class="card shadow-sm">
-        @if($insight->image_url)
-            <img src="{{ $insight->image_url }}" class="card-img-top" alt="{{ $insight->judul }}">
-        @endif
-        <div class="card-body">
-            <h1 class="card-title">{{ $insight->judul }}</h1>
-            <p class="text-muted">Penulis: {{ $insight->penulis }} | Terbit: {{ $insight->TanggalTerbit }}</p>
-            <p class="card-text">{{ $insight->isi }}</p>
-        </div>
-    </div>
+    @if($insight->image_url)
+        <img src="{{ $insight->image_url }}" class="img-fluid mb-4" alt="{{ $insight->judul }}">
+    @endif
+
+    <p>{{ $insight->isi }}</p>
+    <a href="{{ route('insights.index') }}" class="btn btn-secondary">Kembali</a>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

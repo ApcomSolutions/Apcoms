@@ -6,5 +6,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::get('/insights', [InsightWebController::class, 'index']);
-Route::get('/insights/{$id}', [InsightWebController::class, 'show'])->name('insights.show');
+Route::get('/insights', [InsightWebController::class, 'index'])->name('insights.index');
+Route::get('/insights/{id}', [InsightWebController::class, 'show'])->name('insights.show');

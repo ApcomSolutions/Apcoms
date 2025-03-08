@@ -11,7 +11,7 @@ class InsightWebController extends Controller
     public function index()
     {
         $insights = Insight::all(); // Ambil semua data insights
-        return view('insights.insights', compact('insights')); // Kirim ke Blade
+        return view('insights.index', compact('insights')); // Kirim ke Blade
     }
 
     public function show($id)

@@ -23,7 +23,9 @@
                         <h5 class="card-title">{{ $insight->judul }}</h5>
                         <p class="card-text">{{ Str::limit($insight->isi, 100) }}</p>
                         <p class="text-muted">Penulis: {{ $insight->penulis }}</p>
-                        <p class="text-muted">Terbit: {{ $insight->TanggalTerbit }}</p>
+                        <p class="text-muted">Terbit: {{ \Carbon\Carbon::parse($insight->created_at)->format('Y-m-d') }}
+                        </p>
+
                         <a href="{{ route('insights.show', $insight->id) }}" class="btn btn-primary">Baca Selengkapnya</a>
 
                     </div>
