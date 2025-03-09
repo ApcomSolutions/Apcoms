@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\TrackingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TrackingController extends Controller
 {
@@ -86,4 +87,76 @@ class TrackingController extends Controller
         ]);
     }
 
+    /**
+     * Get time-series data for insights activity
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getActivityTimeSeries(Request $request)
+    {
+        try {
+            $period = $request->input('period', 'day');
+            $insightId = $request->input('insight_id'); // Optional parameter for single insight stats
+
+            $data = $this->trackingService->getActivityTimeSeries($period, $insightId);
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            Log::error('Activity time series error: ' . $e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to fetch activity data',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get read time distribution statistics
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getReadTimeDistribution(Request $request)
+    {
+        try {
+            $insightId = $request->input('insight_id'); // Optional parameter for single insight
+            $data = $this->trackingService->getReadTimeDistribution($insightId);
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            Log::error('Read time distribution error: ' . $e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to fetch read time distribution',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get trend data comparing current period to previous period
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTrendData(Request $request)
+    {
+        try {
+            $period = $request->input('period', 'day');
+            $insightId = $request->input('insight_id'); // Optional parameter for single insight
+
+            $data = $this->trackingService->getTrendData($period, $insightId);
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            Log::error('Trend data error: ' . $e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to fetch trend data',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

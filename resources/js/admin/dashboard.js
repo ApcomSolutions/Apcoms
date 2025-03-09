@@ -46,9 +46,13 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchTopInsights();
         fetchRecentViews();
         fetchDeviceBreakdown();
-        createActivityChart();
-        createDeviceChart();
-        createReadTimeChart();
+        fetchActivityData();
+        fetchReadTimeDistribution();
+
+        // Initialize charts with empty data until the API responses arrive
+        createActivityChart([]);
+        createDeviceChart([]);
+        createReadTimeChart({ labels: [], data: [] });
     }
 
     function refreshData() {
@@ -60,7 +64,9 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchTopInsights();
         fetchRecentViews();
         fetchDeviceBreakdown();
-        updateActivityChart();
+        fetchActivityData();
+        fetchReadTimeDistribution();
+        fetchTrendData();
 
         // Stop spinning after 1 second
         setTimeout(() => {
@@ -82,15 +88,56 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('avg-read-time').textContent = `${data.avg_read_time} min`;
             document.getElementById('completion-rate').textContent = `${data.completion_rate}%`;
 
-            // Since we can't calculate trends from API data, we'll remove trend indicators
-            // or set them to 0
+            // Fetch trend data separately to update change percentages
+            fetchTrendData();
+        } catch (error) {
+            console.error('Error fetching overall stats:', error);
+            showErrorMessage('total-views', 'unique-viewers', 'avg-read-time', 'completion-rate');
+        }
+    }
+
+    // Fetch trend data to show changes over time
+    async function fetchTrendData() {
+        try {
+            const response = await fetch(`/api/admin/dashboard/trend-data?period=${currentPeriod}`);
+            if (!response.ok) throw new Error('Failed to fetch trend data');
+
+            const trendData = await response.json();
+
+            // Update trend indicators
+            updateTrendIndicator('total-views-change', trendData.total_views_change);
+            updateTrendIndicator('unique-viewers-change', trendData.unique_viewers_change);
+            updateTrendIndicator('avg-read-time-change', trendData.avg_read_time_change);
+            updateTrendIndicator('completion-rate-change', trendData.completion_rate_change);
+        } catch (error) {
+            console.error('Error fetching trend data:', error);
+            // Reset trend indicators to 0% if there's an error
             document.getElementById('total-views-change').textContent = '0%';
             document.getElementById('unique-viewers-change').textContent = '0%';
             document.getElementById('avg-read-time-change').textContent = '0%';
             document.getElementById('completion-rate-change').textContent = '0%';
-        } catch (error) {
-            console.error('Error fetching overall stats:', error);
-            showErrorMessage('total-views', 'unique-viewers', 'avg-read-time', 'completion-rate');
+        }
+    }
+
+    // Update a trend indicator with proper formatting and color
+    function updateTrendIndicator(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        // Format the value
+        const formattedValue = `${value >= 0 ? '+' : ''}${value}%`;
+        element.textContent = formattedValue;
+
+        // Set color based on value (positive = green, negative = red)
+        if (value > 0) {
+            element.classList.remove('text-red-500');
+            element.classList.add('text-green-500');
+        } else if (value < 0) {
+            element.classList.remove('text-green-500');
+            element.classList.add('text-red-500');
+        } else {
+            element.classList.remove('text-green-500', 'text-red-500');
+            element.classList.add('text-gray-500');
         }
     }
 
@@ -162,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
             views.forEach(view => {
                 const time = new Date(view.time).toLocaleString();
                 const item = document.createElement('div');
-                item.className = 'flex items-center p-3 border-l-4 border-indigo-500 bg-indigo-50 rounded';
+                item.className = 'flex items-center p-3 border-l-4 border-indigo-500 bg-indigo-50 rounded mb-2';
                 item.innerHTML = `
                 <div class="mr-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -194,16 +241,43 @@ document.addEventListener('DOMContentLoaded', function() {
             updateDeviceChart(devices);
         } catch (error) {
             console.error('Error fetching device breakdown:', error);
+            updateDeviceChart([{ type: 'No Data', percentage: 100 }]);
         }
     }
 
-    // Create Activity Chart - since we don't have historical data in the API,
-    // we'll need to create a reasonable visualization
-    function createActivityChart() {
-        const ctx = document.getElementById('activity-chart').getContext('2d');
+    // Fetch Activity Time Series Data from API
+    async function fetchActivityData() {
+        try {
+            const response = await fetch(`/api/admin/dashboard/activity-time-series?period=${currentPeriod}`);
+            if (!response.ok) throw new Error('Failed to fetch activity data');
 
-        // Generate sample data based on time period (this could be replaced with real data if API provided it)
-        const data = generateActivityData();
+            const data = await response.json();
+            updateActivityChart(data);
+        } catch (error) {
+            console.error('Error fetching activity data:', error);
+            // If there's an error, use empty data
+            updateActivityChart({ views: [], readTime: [] });
+        }
+    }
+
+    // Fetch Read Time Distribution from API
+    async function fetchReadTimeDistribution() {
+        try {
+            const response = await fetch('/api/admin/dashboard/read-time-distribution');
+            if (!response.ok) throw new Error('Failed to fetch read time distribution');
+
+            const data = await response.json();
+            updateReadTimeChart(data);
+        } catch (error) {
+            console.error('Error fetching read time distribution:', error);
+            // If there's an error, use empty data
+            updateReadTimeChart({ labels: [], data: [] });
+        }
+    }
+
+    // Create Activity Chart
+    function createActivityChart(initialData = { views: [], readTime: [] }) {
+        const ctx = document.getElementById('activity-chart').getContext('2d');
 
         activityChart = new Chart(ctx, {
             type: 'bar',
@@ -211,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [
                     {
                         label: 'Views',
-                        data: data.views,
+                        data: initialData.views || [],
                         backgroundColor: 'rgba(79, 70, 229, 0.8)',
                         borderColor: 'rgba(79, 70, 229, 1)',
                         borderWidth: 1,
@@ -221,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     {
                         label: 'Read Time (min)',
-                        data: data.readTime,
+                        data: initialData.readTime || [],
                         backgroundColor: 'rgba(16, 185, 129, 0.8)',
                         borderColor: 'rgba(16, 185, 129, 1)',
                         borderWidth: 1,
@@ -273,11 +347,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Create Device Chart
-    function createDeviceChart() {
+    function createDeviceChart(initialData = []) {
         const ctx = document.getElementById('device-chart').getContext('2d');
 
         // Default data until API data is loaded
-        const defaultData = [
+        const defaultData = initialData.length > 0 ? initialData : [
             { type: 'Loading...', percentage: 100 }
         ];
 
@@ -314,23 +388,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Create Read Time Chart (no API endpoint for this, so keeping as static)
-    function createReadTimeChart() {
+    // Create Read Time Chart
+    function createReadTimeChart(initialData = { labels: [], data: [] }) {
         const ctx = document.getElementById('read-time-chart').getContext('2d');
-
-        // Sample data for read time distribution - would be nice to have this from API
-        const readTimeData = {
-            labels: ['<1 min', '1-3 min', '3-5 min', '5-10 min', '>10 min'],
-            data: [15, 28, 32, 18, 7]
-        };
 
         readTimeChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: readTimeData.labels,
+                labels: initialData.labels,
                 datasets: [{
                     label: 'Percentage of Views',
-                    data: readTimeData.data,
+                    data: initialData.data,
                     backgroundColor: 'rgba(16, 185, 129, 0.8)',
                     borderColor: 'rgba(16, 185, 129, 1)',
                     borderWidth: 1,
@@ -358,11 +426,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Update Activity Chart with new data
-    function updateActivityChart() {
+    // Update Activity Chart with new data from API
+    function updateActivityChart(data) {
         if (!activityChart) return;
-
-        const data = generateActivityData();
 
         activityChart.data.datasets[0].data = data.views;
         activityChart.data.datasets[1].data = data.readTime;
@@ -395,60 +461,14 @@ document.addEventListener('DOMContentLoaded', function() {
         deviceChart.update();
     }
 
-    // Generate activity data based on time period (since we don't have this in the API)
-    function generateActivityData() {
-        const now = new Date();
-        const data = { views: [], readTime: [] };
+    // Update Read Time Chart with data from API
+    function updateReadTimeChart(data) {
+        if (!readTimeChart) return;
 
-        let startDate, points, interval;
+        readTimeChart.data.labels = data.labels;
+        readTimeChart.data.datasets[0].data = data.data;
 
-        switch(currentPeriod) {
-            case 'day':
-                startDate = new Date(now);
-                startDate.setHours(0, 0, 0, 0);
-                points = 24;
-                interval = 1000 * 60 * 60; // 1 hour
-                break;
-            case 'week':
-                startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - 7);
-                points = 7;
-                interval = 1000 * 60 * 60 * 24; // 1 day
-                break;
-            case 'month':
-                startDate = new Date(now);
-                startDate.setDate(1);
-                points = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); // Days in month
-                interval = 1000 * 60 * 60 * 24; // 1 day
-                break;
-            case 'all':
-                startDate = new Date(now);
-                startDate.setMonth(startDate.getMonth() - 12);
-                points = 12;
-                interval = 1000 * 60 * 60 * 24 * 30; // ~1 month
-                break;
-        }
-
-        for (let i = 0; i < points; i++) {
-            const date = new Date(startDate.getTime() + (i * interval));
-
-            // Generate data that's more realistic but still random
-            // We don't have this data from the API, so we'll simulate it
-            const viewCount = Math.floor(Math.random() * 50) + 5 + (i % 3 === 0 ? 20 : 0);
-            const readTimeAvg = (Math.random() * 3) + 1 + (i % 2 === 0 ? 1 : 0);
-
-            data.views.push({
-                x: date,
-                y: viewCount
-            });
-
-            data.readTime.push({
-                x: date,
-                y: readTimeAvg
-            });
-        }
-
-        return data;
+        readTimeChart.update();
     }
 
     // Get time unit based on current period
