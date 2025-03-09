@@ -48,8 +48,13 @@
             <div>
                 <h3 class="text-lg font-semibold mb-4">Our Location</h3>
                 <div class="bg-gray-800 w-full h-64 rounded-lg flex items-center justify-center">
-                    <!-- This div will be replaced with Google Maps -->
-                    <p class="text-gray-400">Google Maps will be displayed here</p>
+                    <div id="map" class="w-full h-full rounded-lg">
+                        <!-- Fallback content jika peta gagal dimuat -->
+                        <div id="map-fallback" class="hidden w-full h-full flex flex-col items-center justify-center text-gray-400">
+                            <i class="fas fa-map-marked-alt text-4xl mb-3"></i>
+                            <p class="text-center">Sanggar Kencana Utama No. 1C Sanggar Hurip Estate, Jatisari, Buahbatu, Soekarno Hatta, Kota Bandung, Jawa Barat</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -61,3 +66,105 @@
         </div>
     </div>
 </footer>
+
+@push('scripts')
+    <!-- Google Maps API -->
+    <script>
+        // Variabel global untuk melacak upaya memuat peta
+        var mapLoadAttempted = false;
+        var mapLoadFailed = false;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Periksa apakah elemen map ada
+            if (document.getElementById("map")) {
+                initializeMap();
+            }
+        });
+
+        function initializeMap() {
+            // Hindari memuat ulang peta jika sudah gagal sebelumnya
+            if (mapLoadFailed) {
+                showFallbackContent();
+                return;
+            }
+
+            // Hindari memuat ulang jika sudah dicoba sebelumnya
+            if (mapLoadAttempted) {
+                return;
+            }
+
+            mapLoadAttempted = true;
+
+            // Set timeout untuk mendeteksi kegagalan memuat peta
+            var mapLoadTimeout = setTimeout(function() {
+                // Jika peta tidak dimuat dalam 5 detik, tampilkan fallback
+                if (!window.google || !window.google.maps) {
+                    console.log("Google Maps failed to load within timeout period");
+                    mapLoadFailed = true;
+                    showFallbackContent();
+                }
+            }, 5000);
+
+            // Muat script Google Maps API
+            var script = document.createElement('script');
+            script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyAwu4CGUgxRjUN4pahOIpTsKmKw35gWgN8&callback=initMap";
+            script.async = true;
+            script.defer = true;
+
+            // Handler untuk kesalahan memuat script
+            script.onerror = function() {
+                console.log("Failed to load Google Maps API script");
+                clearTimeout(mapLoadTimeout);
+                mapLoadFailed = true;
+                showFallbackContent();
+            };
+
+            document.head.appendChild(script);
+
+            // Definisikan fungsi callback global
+            window.initMap = function() {
+                clearTimeout(mapLoadTimeout);
+
+                try {
+                    var location = { lat: -6.938139, lng: 107.666861 };
+
+                    // Periksa apakah elemen map masih ada di DOM
+                    var mapElement = document.getElementById("map");
+                    if (!mapElement) {
+                        console.log("Map element no longer exists");
+                        return;
+                    }
+
+                    var map = new google.maps.Map(mapElement, {
+                        zoom: 15,
+                        center: location
+                    });
+
+                    var marker = new google.maps.Marker({
+                        position: location,
+                        map: map
+                    });
+
+                    // Sembunyikan fallback content jika peta berhasil dimuat
+                    if (document.getElementById("map-fallback")) {
+                        document.getElementById("map-fallback").classList.add("hidden");
+                    }
+
+                    console.log("Google Maps successfully initialized");
+                } catch (error) {
+                    console.error("Error initializing Google Maps:", error);
+                    mapLoadFailed = true;
+                    showFallbackContent();
+                }
+            };
+        }
+
+        function showFallbackContent() {
+            // Tampilkan konten fallback jika memuat peta gagal
+            var fallbackElement = document.getElementById("map-fallback");
+            if (fallbackElement) {
+                fallbackElement.classList.remove("hidden");
+            }
+        }
+    </script>
+@endpush
