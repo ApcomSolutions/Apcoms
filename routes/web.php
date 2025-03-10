@@ -19,7 +19,10 @@ Route::prefix('insights')->name('insights.')->group(function () {
 
 // 📊 Routes untuk halaman admin (dashboard dan insights)
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Dashboard
+    // Dashboard utama
+    Route::get('/', [AdminDashboardController::class, 'dashboard'])->name('home');
+
+    // Dashboard analytics
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Insights management
@@ -27,4 +30,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Categories management
     Route::get('/categories', [CategoryAdminController::class, 'index'])->name('categories');
+
+    // Teams, Clients, Gallery
+    Route::get('/teams', [App\Http\Controllers\Web\Admin\TeamAdminController::class, 'index'])->name('teams');
+    Route::get('/clients', [App\Http\Controllers\Web\Admin\ClientAdminController::class, 'index'])->name('clients');
+    Route::get('/gallery', [App\Http\Controllers\Web\Admin\GalleryAdminController::class, 'index'])->name('gallery');
 });
