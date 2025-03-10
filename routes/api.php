@@ -51,3 +51,31 @@ Route::prefix('tracking')->group(function () {
     Route::post('/read-time', [TrackingController::class, 'trackReadTime']);         // Simpan waktu baca
     Route::get('/stats/{insightId}', [TrackingController::class, 'getStats']);       // Statistik insight tertentu
 });
+
+// Team routes
+Route::get('/teams', [App\Http\Controllers\Api\TeamController::class, 'index']);
+Route::get('/teams/active', [App\Http\Controllers\Api\TeamController::class, 'active']);
+Route::get('/teams/{id}', [App\Http\Controllers\Api\TeamController::class, 'show']);
+Route::post('/teams', [App\Http\Controllers\Api\TeamController::class, 'store']);
+Route::put('/teams/{id}', [App\Http\Controllers\Api\TeamController::class, 'update']);
+Route::delete('/teams/{id}', [App\Http\Controllers\Api\TeamController::class, 'destroy']);
+Route::post('/teams/update-order', [App\Http\Controllers\Api\TeamController::class, 'updateOrder']);
+
+// Client routes
+Route::get('/clients', [App\Http\Controllers\Api\ClientController::class, 'index']);
+Route::get('/clients/active', [App\Http\Controllers\Api\ClientController::class, 'active']);
+Route::get('/clients/{id}', [App\Http\Controllers\Api\ClientController::class, 'show']);
+Route::post('/clients', [App\Http\Controllers\Api\ClientController::class, 'store']);
+Route::put('/clients/{id}', [App\Http\Controllers\Api\ClientController::class, 'update']);
+Route::delete('/clients/{id}', [App\Http\Controllers\Api\ClientController::class, 'destroy']);
+Route::post('/clients/update-order', [App\Http\Controllers\Api\ClientController::class, 'updateOrder']);
+
+// Gallery routes
+Route::get('/gallery', [App\Http\Controllers\Api\GalleryController::class, 'index']);
+Route::get('/gallery/active', [App\Http\Controllers\Api\GalleryController::class, 'active']);
+Route::get('/gallery/carousel', [App\Http\Controllers\Api\GalleryController::class, 'carousel']);
+Route::get('/gallery/{id}', [App\Http\Controllers\Api\GalleryController::class, 'show']);
+Route::post('/gallery', [App\Http\Controllers\Api\GalleryController::class, 'store']);
+Route::put('/gallery/{id}', [App\Http\Controllers\Api\GalleryController::class, 'update']);
+Route::delete('/gallery/{id}', [App\Http\Controllers\Api\GalleryController::class, 'destroy']);
+Route::post('/gallery/update-order', [App\Http\Controllers\Api\GalleryController::class, 'updateOrder']);
