@@ -7,11 +7,12 @@
             <h1 class="text-3xl font-bold text-center mb-8">Daftar Insights</h1>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($insights as $insight)
+                @foreach ($insights as $insight)
                     <div class="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
                         {{-- Tampilkan gambar jika ada --}}
-                        @if(isset($insight['image_url']) && $insight['image_url'])
-                            <img src="{{ $insight['image_url'] }}" class="w-full h-48 object-cover" alt="{{ $insight['judul'] }}">
+                        @if (isset($insight['image_url']) && $insight['image_url'])
+                            <img src="{{ $insight['image_url'] }}" class="w-full h-48 object-cover"
+                                alt="{{ $insight['judul'] }}">
                         @endif
 
                         <div class="p-4 flex flex-col flex-grow">
@@ -27,7 +28,7 @@
                                 </div>
 
                                 <a href="{{ route('insights.show', $insight['slug']) }}"
-                                   class="block w-full bg-pink-500 text-white text-center py-2 rounded-md hover:bg-pink-600 transition">
+                                    class="block w-full bg-pink-500 text-white text-center py-2 rounded-md hover:bg-pink-600 transition">
                                     Baca Selengkapnya
                                 </a>
                             </div>
@@ -37,7 +38,7 @@
             </div>
 
             {{-- Pagination - only include if $insights is a paginator instance --}}
-            @if(method_exists($insights, 'links'))
+            @if (method_exists($insights, 'links'))
                 <div class="mt-8">
                     {{ $insights->links() }}
                 </div>
