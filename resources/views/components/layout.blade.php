@@ -8,17 +8,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    @vite([
-        'resources/css/app.css',
-        'resources/css/admin/insight-crud.css',
-        'resources/js/app.js',
-        'resources/js/cart.js',
-        'resources/js/admin/insight-crud.js',
-        'resources/js/admin/dashboard.js',
-        'resources/js/admin/category-crud.js',
-    ])
+    @vite(['resources/css/app.css', 'resources/css/admin/insight-crud.css', 'resources/js/app.js', 'resources/js/cart.js', 'resources/js/admin/insight-crud.js', 'resources/js/admin/dashboard.js'])
     {{-- font awesome --}}
     <script src="https://kit.fontawesome.com/e20865611c.js" crossorigin="anonymous"></script>
+
+    <!-- Load AOS Library  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
     <title>{{ $title ?? 'APCOM Solutions' }}</title>
 
@@ -26,13 +22,13 @@
 </head>
 
 <body class="h-full bg-white">
-<div class="min-h-full bg-white">
-    <main class="bg-white">
-        {{ $slot }}
-    </main>
-</div>
+    <div class="min-h-full bg-white">
+        <main class="bg-white">
+            {{ $slot }}
+        </main>
+    </div>
 
-@stack('scripts')
+    @stack('scripts')
 </body>
 
 </html>
