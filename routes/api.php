@@ -16,11 +16,11 @@ Route::prefix('insights')->group(function () {
 
 // 📂 API untuk Categories
 Route::prefix('categories')->group(function () {
-    Route::get('/', [CategoryController::class, 'showAllCategory']);
-    Route::get('/{slug}', [CategoryController::class, 'showCategoryById']);
-    Route::post('/', [CategoryController::class, 'store']);
-    Route::put('/{slug}', [CategoryController::class, 'update']);
-    Route::delete('/{slug}', [CategoryController::class, 'destroy']);
+    Route::get('/', [CategoryController::class, 'showAllCategory']);          // Semua categories (JSON)
+    Route::get('/{id}', [CategoryController::class, 'showCategoryById']);     // Get category by ID
+    Route::post('/', [CategoryController::class, 'store']);                   // Tambah category
+    Route::put('/{id}', [CategoryController::class, 'update']);               // Update category
+    Route::delete('/{id}', [CategoryController::class, 'destroy']);           // Hapus category
 });
 
 // 📊 API untuk Admin Dashboard

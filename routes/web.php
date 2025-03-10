@@ -3,6 +3,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Web\Admin\AdminDashboardController;
 use App\Http\Controllers\Web\InsightWebController;
 use App\Http\Controllers\Web\Admin\InsightAdminController;
+use App\Http\Controllers\Web\Admin\CategoryAdminController;
 use Illuminate\Support\Facades\Route;
 
 // 🏠 Home route
@@ -12,6 +13,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::prefix('insights')->name('insights.')->group(function () {
     Route::get('/', [InsightWebController::class, 'index'])->name('index');
     Route::get('/category/{slug}', [InsightWebController::class, 'category'])->name('category');
+    Route::get('/search', [InsightWebController::class, 'search'])->name('search');
     Route::get('/{slug}', [InsightWebController::class, 'show'])->name('show');
 });
 
@@ -22,4 +24,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Insights management
     Route::get('/insights', [InsightAdminController::class, 'index'])->name('insights');
+
+    // Categories management
+    Route::get('/categories', [CategoryAdminController::class, 'index'])->name('categories');
 });

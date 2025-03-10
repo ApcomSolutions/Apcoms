@@ -14,7 +14,8 @@
         'resources/js/app.js',
         'resources/js/cart.js',
         'resources/js/admin/insight-crud.js',
-        'resources/js/admin/dashboard.js'
+        'resources/js/admin/dashboard.js',
+        'resources/js/admin/category-crud.js',
     ])
     {{-- font awesome --}}
     <script src="https://kit.fontawesome.com/e20865611c.js" crossorigin="anonymous"></script>

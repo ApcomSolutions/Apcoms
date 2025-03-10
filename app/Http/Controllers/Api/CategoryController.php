@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-
-
+use App\Http\Controllers\Controller;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
 
-
-class CategoryController{
+class CategoryController extends Controller {
 
     protected $categoryService;
 
@@ -18,39 +16,44 @@ class CategoryController{
 
     public function showAllCategory(){
         $categories = $this->categoryService->GetAllCategories();
-       return response()->json($categories, 200);
+        return response()->json($categories, 200);
     }
 
     public function showCategoryById($id){
-        $categories = $this->categoryService->GetCategoriesById($id);
-        return response()->json($categories, 200);
+        $category = $this->categoryService->GetCategoriesById($id);
+        return response()->json($category, 200);
+    }
+
+    public function showCategoryBySlug($slug){
+        $category = $this->categoryService->GetCategoriesBySlug($slug);
+        return response()->json($category, 200);
     }
 
     public function store(Request $request)
     {
-        $categories = $this->categoryService->createCategories($request);
+        $category = $this->categoryService->createCategories($request);
 
         return response()->json([
-            'message' => 'Insight berhasil dibuat',
-            'data' => $categories
+            'message' => 'Category successfully created',
+            'data' => $category
         ], 201);
     }
 
     public function update(Request $request, $id){
-        $categories = $this->categoryService->GetCategoriesById($id);
-        $categories = $this->categoryService->updateCategories($request, $categories);
+        $category = $this->categoryService->updateCategories($request, $id);
+
         return response()->json([
-            'message' => 'Insight berhasil diubah',
-            'data' => $categories
+            'message' => 'Category successfully updated',
+            'data' => $category
         ], 200);
     }
 
     public function destroy($id){
-        $categories = $this->categoryService->GetCategoriesById($id);
-        $categories = $this->categoryService->DeleteCategories($categories);
+        $category = $this->categoryService->deleteCategories($id);
+
         return response()->json([
-            'message' => 'Insight berhasil dihapus',
-            'data' => $categories
+            'message' => 'Category successfully deleted',
+            'data' => $category
         ], 200);
     }
 }
