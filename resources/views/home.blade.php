@@ -35,7 +35,7 @@
                     publikasi ilmiah, kami siap membawa reputasi Anda ke tingkat yang lebih tinggi.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <a href="#"
+                    <a href="https://wa.me/628125881289"
                         class="bg-pink-500 hover:bg-pink-600 text-white font-medium py-3 px-8 rounded-full shadow-md transition duration-300 text-center">
                         Konsultasi Sekarang
                     </a>
@@ -54,7 +54,7 @@
     {{-- About Us Section --}}
     <div class="py-30 px-4 relative overflow-hidden">
         <!-- Blue-500 background with fade effects -->
-        <div class="absolute inset-0 bg-blue-500">
+        <div class="absolute inset-0 bg-blue-100">
             <!-- TAMBAHAN: Bubble pudar putih bergerak horizontal -->
             <div class="floating-bubbles">
                 <div class="bubble bubble-1"></div>
@@ -75,13 +75,13 @@
 
             <!-- Animated floating circles background -->
             <div class="absolute inset-0">
-                <div class="absolute top-1/4 left-1/4 w-20 h-20 rounded-full bg-blue-400 opacity-20 animate-pulse">
+                <div class="absolute top-1/4 left-1/4 w-20 h-20 rounded-full bg-blue-700 opacity-20 animate-pulse">
                 </div>
-                <div class="absolute top-3/4 left-1/3 w-16 h-16 rounded-full bg-blue-300 opacity-15 animate-pulse"
+                <div class="absolute top-3/4 left-1/3 w-16 h-16 rounded-full bg-blue-700 opacity-15 animate-pulse"
                     style="animation-delay: 1s;"></div>
-                <div class="absolute top-1/3 right-1/4 w-24 h-24 rounded-full bg-blue-400 opacity-20 animate-pulse"
+                <div class="absolute top-1/3 right-1/4 w-24 h-24 rounded-full bg-blue-600 opacity-20 animate-pulse"
                     style="animation-delay: 2s;"></div>
-                <div class="absolute bottom-1/4 right-1/3 w-12 h-12 rounded-full bg-blue-300 opacity-15 animate-pulse"
+                <div class="absolute bottom-1/4 right-1/3 w-12 h-12 rounded-full bg-blue-600 opacity-15 animate-pulse"
                     style="animation-delay: 0.5s;"></div>
             </div>
 
@@ -107,7 +107,7 @@
 
             <!-- Main content card with enhanced styling -->
             <div
-                class="max-w-4xl mx-auto bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-blue-400 transform transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl">
+                class="max-w-4xl mx-auto bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-white transform transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl">
                 <!-- Decorative header element -->
                 <div class="flex justify-center mb-6 relative">
                     <div class="absolute -top-6">
@@ -209,7 +209,7 @@
                 <div class="mt-8 flex justify-center">
                     <button
                         class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-lg transform transition hover:scale-105 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                        Hubungi Kami
+                        <a href="contact">Hubungi Kami</a>
                     </button>
                 </div>
             </div>
@@ -314,7 +314,7 @@
 
     {{-- Our Services Section --}}
     <div class="py-16 px-6 relative overflow-hidden">
-        <div class="absolute inset-0 bg-blue-50">
+        <div class="absolute inset-0 bg-white">
             <!-- Subtle grid pattern overlay -->
             <div class="absolute inset-0 opacity-5"
                 style="background-image: url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%236b7280\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E');">

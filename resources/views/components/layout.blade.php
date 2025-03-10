@@ -18,6 +18,12 @@
 
     <title>{{ $title ?? 'APCOM Solutions' }}</title>
 
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+
     @stack('styles')
 </head>
 
