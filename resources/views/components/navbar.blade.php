@@ -1,10 +1,11 @@
 <!-- resources/views/components/navbar.blade.php -->
-<nav class="bg-white shadow-md" x-data="{ mobileMenuOpen: false, serviceOpen: false, insightOpen: false }">
+<nav class="bg-white/80 shadow-md fixed top-0 left-0 w-full z-50 backdrop-blur-md transition-all duration-300"
+    x-data="{ mobileMenuOpen: false, serviceOpen: false, insightOpen: false, scrolled: false }" x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 50 })" :class="{ 'shadow-lg bg-white/95': scrolled }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <!-- Logo only -->
+                    <!-- Logo -->
                     <a href="#" class="flex items-center">
                         <img class="h-8 w-auto" src="{{ asset('images/logo.png') }}" alt="APCOM SOLUTIONS">
                     </a>
@@ -90,7 +91,7 @@
                 <!-- Contact button integrated into main nav -->
                 <button type="button"
                     class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                    Contact Now
+                    Login
                 </button>
             </div>
 

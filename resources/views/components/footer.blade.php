@@ -19,14 +19,14 @@
                 <div class="space-y-2">
                     <p class="flex items-center">
                         <i class="fas fa-phone text-pink-500 w-5 mr-2"></i>
-                        0812-5881-289
+                        +62 812-5881-289
                     </p>
                     <p class="flex items-center">
                         <i class="fas fa-envelope text-pink-500 w-5 mr-2"></i>
                         adminapcoms@apcoms.co.id
                     </p>
                     <p class="flex items-start">
-                        <i class="fas fa-map-marker-alt text-pink-500 w-5 mr-2 mt-1 text-sm"></i>
+                        <i class="fas fa-map-marker-alt text-pink-500 w-5 mr-2"></i>
                         <span>Sanggar Kencana Utama No. 1C Sanggar Hurip Estate, Jatisari, Buahbatu, Soekarno Hatta,
                             Kota Bandung, Jawa Barat</span>
                     </p>
