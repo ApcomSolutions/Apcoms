@@ -28,3 +28,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Categories management
     Route::get('/categories', [CategoryAdminController::class, 'index'])->name('categories');
 });
+
+
+
+
+//ini dari fe
+Route::get('/about', function () {
+    return view('about');
+});
+
+Route::get('/contact', function () {
+    return view('contact');
+});
+
+
+Route::get('/penerbitskt', function () {
+    return view('penerbitskt.index');
+})->name('penerbitskt');
+
+
+
+
