@@ -424,7 +424,7 @@ class GalleryService
         return $request->validate([
             'title' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'image' => $request->isMethod('post') ? 'required|image|mimes:jpg,jpeg,png|max:2048' : 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => $request->isMethod('post') ? 'required|image|mimes:jpg,jpeg,png,webp|max:10240' : 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
             'is_carousel' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
             'order' => 'nullable|integer',

@@ -25,6 +25,18 @@
         html {
             scroll-behavior: smooth;
         }
+
+        @media screen and (min-width: 1024px) {
+            .zoom responsive {
+                zoom: 0.8;
+            }
+        }
+
+        @media screen and (min-width: 1280px) {
+            .zoom responsive {
+                zoom: 1;
+            }
+        }
     </style>
 
     @stack('styles')
@@ -32,7 +44,7 @@
 
 <body class="h-full bg-white">
     <div class="min-h-full bg-white">
-        <main class="bg-white">
+        <main class="bg-white zoom-responsive">
             {{ $slot }}
         </main>
     </div>

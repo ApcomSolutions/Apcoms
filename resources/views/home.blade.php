@@ -107,7 +107,7 @@
 
             <!-- Main content card with enhanced styling -->
             <div
-                class="max-w-4xl mx-auto bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-white transform transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl">
+                class="max-w-4xl mx-auto bg-white bg-opacity-90 rounded-xl shadow-xl p-8 border border-white transform transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl">
                 <!-- Decorative header element -->
                 <div class="flex justify-center mb-6 relative">
                     <div class="absolute -top-6">
@@ -623,7 +623,7 @@
 
     .bubble {
         position: absolute;
-        background-color: rgba(255, 255, 255, 0.37);
+        background-color: rgba(141, 221, 255, 0.079);
         border-radius: 50%;
         pointer-events: none;
     }
