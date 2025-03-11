@@ -5,7 +5,7 @@
     <x-navbar />
 
     <div class="bg-white w-full">
-        <div class="container mx-auto px-4 py-8">
+        <div class="container mx-auto px-4 py-8 mt-10">
             <!-- Hidden tracking ID for JavaScript -->
             <input type="hidden" id="tracking-id" value="{{ $tracking->id }}">
 
@@ -13,10 +13,12 @@
                 <!-- Main Content -->
                 <div class="md:w-2/3">
                     <h1 class="text-3xl font-bold mb-4 text-gray-800">{{ $insight->judul }}</h1>
-                    <p class="text-gray-600 mb-6">Penulis: {{ $insight->penulis }} | Terbit: {{ \Carbon\Carbon::parse($insight->TanggalTerbit)->format('d M Y') }}</p>
+                    <p class="text-gray-600 mb-6">Penulis: {{ $insight->penulis }} | Terbit:
+                        {{ \Carbon\Carbon::parse($insight->TanggalTerbit)->format('d M Y') }}</p>
 
-                    @if($insight->image_url)
-                        <img src="{{ $insight->image_url }}" class="w-full h-auto rounded-lg mb-8 shadow-md" alt="{{ $insight->judul }}">
+                    @if ($insight->image_url)
+                        <img src="{{ $insight->image_url }}" class="w-1/4 mx-auto h-auto rounded-lg mb-8 shadow-md"
+                            alt="{{ $insight->judul }}">
                     @endif
 
                     <div class="prose max-w-none mb-8 bg-white p-6 rounded-lg shadow-md">
@@ -24,26 +26,26 @@
                     </div>
 
                     <div class="mb-8">
-                        <a href="{{ route('insights.index') }}" class="inline-block px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition duration-200">Kembali</a>
+                        <a href="{{ route('insights.index') }}"
+                            class="inline-block px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition duration-200">Kembali</a>
                     </div>
                 </div>
 
                 <!-- Sidebar -->
                 <div class="md:w-1/3">
                     <!-- Search Section -->
-                    <div class="bg-white p-6 rounded-lg shadow-md mb-6"
-                         x-data="{
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-6" x-data="{
                         query: '',
                         results: [],
                         searching: false,
                         debounceTimer: null,
-
+                    
                         handleSearch() {
                             this.query = this.$refs.searchInput.value.trim();
-
+                    
                             // Clear previous timeout
                             clearTimeout(this.debounceTimer);
-
+                    
                             if (this.query.length > 0) {
                                 this.searching = true;
                                 this.results = [];
@@ -54,11 +56,11 @@
                                 this.$refs.searchResults.classList.add('hidden');
                                 return;
                             }
-
+                    
                             // Debounce search requests
                             this.debounceTimer = setTimeout(() => {
                                 if (this.query.length < 2) return;
-
+                    
                                 fetch(`/api/insights/search?query=${encodeURIComponent(this.query)}`)
                                     .then(response => {
                                         if (!response.ok) {
@@ -77,7 +79,7 @@
                                     });
                             }, 300);
                         },
-
+                    
                         formatDate(dateString) {
                             return new Date(dateString).toLocaleDateString('id-ID', {
                                 day: 'numeric',
@@ -85,18 +87,20 @@
                                 year: 'numeric'
                             });
                         }
-                     }">
+                    }">
                         <h2 class="text-xl font-semibold mb-4">Search</h2>
                         <div class="border-t-2 border-indigo-500 w-16 mb-6"></div>
                         <div class="relative">
                             <input type="text" x-ref="searchInput" id="search-input" placeholder="Search..."
-                                   class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                   @input="handleSearch()">
+                                class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                @input="handleSearch()">
                             <span class="absolute right-2 top-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </span>
                         </div>
                         <div x-ref="searchResults" id="search-results" class="mt-4 hidden">
                             <template x-if="searching">
@@ -108,13 +112,15 @@
                             <div class="space-y-3" x-show="results.length > 0">
                                 <template x-for="item in results.slice(0, 5)" :key="item.id">
                                     <div class="border-b pb-2">
-                                        <a :href="`/insights/${item.slug}`" class="text-gray-700 hover:text-indigo-600" x-text="item.judul"></a>
+                                        <a :href="`/insights/${item.slug}`" class="text-gray-700 hover:text-indigo-600"
+                                            x-text="item.judul"></a>
                                         <p class="text-xs text-gray-500" x-text="formatDate(item.TanggalTerbit)"></p>
                                     </div>
                                 </template>
                                 <template x-if="results.length > 5">
                                     <div class="text-center mt-2">
-                                        <a :href="`/insights?query=${encodeURIComponent(query)}`" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                                        <a :href="`/insights?query=${encodeURIComponent(query)}`"
+                                            class="text-indigo-600 hover:text-indigo-800 text-sm">
                                             View all <span x-text="results.length"></span> results
                                         </a>
                                     </div>
@@ -128,9 +134,10 @@
                         <h2 class="text-xl font-semibold mb-4">Categories</h2>
                         <div class="border-t-2 border-indigo-500 w-16 mb-6"></div>
                         <ul class="space-y-4">
-                            @foreach($categories as $category)
+                            @foreach ($categories as $category)
                                 <li class="border-b pb-2">
-                                    <a href="{{ route('insights.category', $category->slug) }}" class="flex justify-between items-center text-gray-700 hover:text-indigo-600 transition">
+                                    <a href="{{ route('insights.category', $category->slug) }}"
+                                        class="flex justify-between items-center text-gray-700 hover:text-indigo-600 transition">
                                         <span>{{ $category->name }}</span>
                                         <span class="text-gray-500">({{ $category->insights_count }})</span>
                                     </a>
@@ -245,13 +252,14 @@
                         };
 
                         fetch('/api/tracking/read-time', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify(data)
-                        })
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                        'content')
+                                },
+                                body: JSON.stringify(data)
+                            })
                             .catch(error => {
                                 console.error('Error updating read time:', error);
                             });
@@ -278,5 +286,5 @@
                     }
                 });
             </script>
-    @endpush
+        @endpush
 </x-layout>
