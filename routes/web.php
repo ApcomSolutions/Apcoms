@@ -77,6 +77,10 @@ Route::get('/penerbitskt', function () {
     return view('penerbitskt.index');
 })->name('penerbitskt');
 
+Route::get('/penerbitskt/layanan', function () {
+    return view('penerbitskt.layanan');
+})->name('penerbitskt.layanan');
+
 
 
 
