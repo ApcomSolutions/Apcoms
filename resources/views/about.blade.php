@@ -1,3 +1,4 @@
+{{-- resources/views/about.blade.php --}}
 <x-layout>
     <x-navbar></x-navbar>
 
@@ -40,7 +41,7 @@
             <div class="w-full md:w-1/2 flex justify-center">
                 <div class="rounded-image-container w-full max-w-xl">
                     <img src="{{ asset('images/about.png') }}" alt="Tim Kerja PT. Solusi Komunikasi Terapan"
-                        class="w-full h-auto">
+                         class="w-full h-auto">
                 </div>
             </div>
         </div>
@@ -117,62 +118,8 @@
         </div>
     </div>
 
-    <!-- Team Section dengan padding tambahan di kiri dan kanan serta card lebih kecil -->
-    <div class="container mx-auto py-16 px-6 md:px-12 lg:px-24">
-        <!-- Team Members Badge & Heading -->
-        <div class="text-center mb-16">
-            <span class="inline-block bg-blue-100 text-black px-4 py-2 rounded-md font-bold mb-4">TEAM MEMBERS</span>
-            <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold text-center max-w-4xl mx-auto">Meet the talented team
-                from our company</h2>
-        </div>
-
-        <!-- Team Cards Grid - Tetap 4 kolom di semua ukuran layar dengan card lebih kecil -->
-        <div class="grid grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
-            <!-- Team Member 1 -->
-            <div class="team-card">
-                <div class="rounded-lg overflow-hidden">
-                    <img src="{{ asset('images/potret.jpg') }}" alt="Waska Warta" class="w-full h-auto">
-                </div>
-                <div class="mt-2 md:mt-3">
-                    <p class="text-gray-600 text-xs sm:text-sm md:text-base">Reputation Management</p>
-                    <h3 class="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold">Waska Warta</h3>
-                </div>
-            </div>
-
-            <!-- Team Member 2 -->
-            <div class="team-card">
-                <div class="rounded-lg overflow-hidden">
-                    <img src="{{ asset('images/potret.jpg') }}" alt="Yosal Iriantara" class="w-full h-auto">
-                </div>
-                <div class="mt-2 md:mt-3">
-                    <p class="text-gray-600 text-xs sm:text-sm md:text-base">Media Relations</p>
-                    <h3 class="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold">Yosal Iriantara</h3>
-                </div>
-            </div>
-
-            <!-- Team Member 3 -->
-            <div class="team-card">
-                <div class="rounded-lg overflow-hidden">
-                    <img src="{{ asset('images/potret.jpg') }}" alt="Wahdi Suardi" class="w-full h-auto">
-                </div>
-                <div class="mt-2 md:mt-3">
-                    <p class="text-gray-600 text-xs sm:text-sm md:text-base">Research & Data Analysis</p>
-                    <h3 class="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold">Wahdi Suardi</h3>
-                </div>
-            </div>
-
-            <!-- Team Member 4 -->
-            <div class="team-card">
-                <div class="rounded-lg overflow-hidden">
-                    <img src="{{ asset('images/potret.jpg') }}" alt="Tansah Rahmatullah" class="w-full h-auto">
-                </div>
-                <div class="mt-2 md:mt-3">
-                    <p class="text-gray-600 text-xs sm:text-sm md:text-base">Research & Data Analysis</p>
-                    <h3 class="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold">Tansah Rahmatullah</h3>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Team Section Component -->
+    <x-team-section></x-team-section>
 
     <x-contact></x-contact>
 
@@ -199,4 +146,12 @@
         }
     </script>
     <x-footer></x-footer>
+
+    @push('styles')
+        <link rel="stylesheet" href="{{ asset('css/team.css') }}">
+    @endpush
+
+    @push('scripts')
+        <script src="{{ asset('js/team.js') }}"></script>
+    @endpush
 </x-layout>
