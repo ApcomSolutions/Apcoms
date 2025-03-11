@@ -49,9 +49,28 @@ Route::get('/contact', function () {
     return view('contact');
 });
 
+// Untuk menampilkan form lupa password (opsional jika Anda menggunakan Alpine.js seperti di atas)
 Route::get('/login', function () {
     return view('login.index');
-});
+})->name('login');
+
+// Untuk memproses permintaan reset password
+Route::post('/login', [PasswordResetController::class, 'sendOTP'])->name('login.forgot-password');
+
+
+// Menampilkan halaman verifikasi OTP
+Route::get('/verify-otp', function () {
+    if (!session('email')) {
+        return redirect()->route('login');
+    }
+    return view('login.verify-otp', ['email' => session('email')]);
+})->name('login.verify-otp.form');
+
+// Memproses verifikasi OTP
+Route::post('/verify-otp', [PasswordResetController::class, 'verifyOTP'])->name('login.verify-otp');
+
+// Mengirim ulang OTP
+Route::post('/resend-otp', [PasswordResetController::class, 'resendOTP'])->name('login.resend-otp');
 
 
 Route::get('/penerbitskt', function () {
