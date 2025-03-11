@@ -95,10 +95,10 @@
                 </a>
 
                 <!-- Contact button integrated into main nav -->
-                <button type="button"
+                <a type="button" href="/login"
                     class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                    Contact Us
-                </button>
+                    Login
+                </a>
             </div>
 
             <!-- Mobile menu button -->
@@ -182,7 +182,7 @@
             </div>
 
             <!-- Mobile Login Button -->
-            <a href="#"
+            <a href="/login"
                 class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-pink-500 hover:bg-gray-50 hover:border-pink-300 hover:text-pink-700">
                 Login
             </a>
