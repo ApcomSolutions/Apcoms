@@ -8,7 +8,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    @vite(['resources/css/app.css', 'resources/css/admin/insight-crud.css', 'resources/js/app.js', 'resources/js/cart.js', 'resources/js/admin/insight-crud.js', 'resources/js/admin/dashboard.js'])
+    @vite(['resources/css/app.css', 'resources/css/admin/insight-crud.css', 'resources/js/app.js',
+            'resources/js/cart.js', 'resources/js/admin/insight-crud.js', 'resources/js/admin/dashboard.js',
+             'resources/js/admin/teams.js', 'resources/js/admin/clients.js', 'resources/js/admin/gallery.js','resources/js/admin/category-crud.js'])
     {{-- font awesome --}}
     <script src="https://kit.fontawesome.com/e20865611c.js" crossorigin="anonymous"></script>
 
