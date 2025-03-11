@@ -10,3 +10,15 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+@media screen and (min-width: 1024px){
+    .zoom responsive{
+        zoom : 0.8;
+    }
+}
+
+@media screen and (min-width: 1280px){
+    .zoom responsive{
+        zoom : 1;
+    }
+}

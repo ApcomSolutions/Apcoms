@@ -89,7 +89,7 @@ class InsightService
             'slug' => 'required|string|unique:insights,slug,'.$insight->id,
             'isi' => 'required|string',
             'penulis' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
             'TanggalTerbit' => 'required|date',
             'category_id' => 'nullable|exists:categories,id',
         ]);
