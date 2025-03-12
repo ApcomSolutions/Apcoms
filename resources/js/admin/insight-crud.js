@@ -546,16 +546,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Fetch insight stats from API
+    // async function fetchInsightStats(insightId) {
+    //     try {
+    //         const response = await fetch(`/api/admin/dashboard/insight-stats/${insightId}`);
+    //         if (!response.ok) {
+    //             if (response.status === 404) {
+    //                 // No stats available yet, return defaults
+    //                 return { total_views: 0, avg_read_time: 0 };
+    //             }
+    //             throw new Error('Failed to fetch stats');
+    //         }
+    //         return await response.json();
+    //     } catch (error) {
+    //         console.error(`Error fetching stats for insight ${insightId}:`, error);
+    //         return { total_views: 0, avg_read_time: 0 };
+    //     }
+    // }
+
+    // Tambahkan di awal file insight-crud.js
     async function fetchInsightStats(insightId) {
         try {
-            const response = await fetch(`/api/admin/dashboard/insight-stats/${insightId}`);
+            const response = await fetch(`/api/admin/dashboard/insight-stats/${insightId}`, {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            });
+
             if (!response.ok) {
                 if (response.status === 404) {
-                    // No stats available yet, return defaults
                     return { total_views: 0, avg_read_time: 0 };
                 }
-                throw new Error('Failed to fetch stats');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+
             return await response.json();
         } catch (error) {
             console.error(`Error fetching stats for insight ${insightId}:`, error);

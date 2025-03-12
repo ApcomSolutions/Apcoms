@@ -7,11 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class NewsService
 {
     /**
-     * Get all news items
+     * Get all news items (respects global scope - published only for public)
      * @return array
      */
     public function getAllNews()
@@ -31,13 +32,13 @@ class NewsService
                     'news_category_id' => $news->news_category_id,
                     'category_name' => $news->category ? $news->category->name : null,
                     'category_slug' => $news->category ? $news->category->slug : null,
-                    'status' => $news->status, // Added status field
+                    'status' => $news->status,
                 ];
             });
     }
 
     /**
-     * Get paginated news
+     * Get paginated news (respects global scope - published only for public)
      * @param int $perPage
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
@@ -49,13 +50,15 @@ class NewsService
     }
 
     /**
-     * Get a specific news item by ID
+     * Get a specific news item by ID (works for both published and drafts)
      * @param int $id
      * @return array
      */
     public function getNewsById($id)
     {
-        $news = News::with('category')->findOrFail($id);
+        $news = News::withoutGlobalScope('published')
+            ->with('category')
+            ->findOrFail($id);
 
         return [
             'id' => $news->id,
@@ -68,18 +71,21 @@ class NewsService
             'news_category_id' => $news->news_category_id,
             'category_name' => $news->category ? $news->category->name : null,
             'category_slug' => $news->category ? $news->category->slug : null,
-            'status' => $news->status, // Added status field
+            'status' => $news->status,
         ];
     }
 
     /**
-     * Get a specific news item by slug
+     * Get a specific news item by slug (works for both published and drafts)
      * @param string $slug
      * @return array
      */
     public function getNewsBySlug($slug)
     {
-        $news = News::with('category')->where('slug', $slug)->firstOrFail();
+        $news = News::withoutGlobalScope('published')
+            ->with('category')
+            ->where('slug', $slug)
+            ->firstOrFail();
 
         return [
             'id' => $news->id,
@@ -92,12 +98,12 @@ class NewsService
             'news_category_id' => $news->news_category_id,
             'category_name' => $news->category ? $news->category->name : null,
             'category_slug' => $news->category ? $news->category->slug : null,
-            'status' => $news->status, // Added status field
+            'status' => $news->status,
         ];
     }
 
     /**
-     * Create a new news item
+     * Create a new news item with proper slug handling
      * @param Request $request
      * @return array
      */
@@ -110,17 +116,16 @@ class NewsService
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'publish_date' => 'required|date',
             'news_category_id' => 'nullable|exists:news_categories,id',
-            'status' => 'nullable|in:published,draft', // Added status validation
+            'status' => 'nullable|in:published,draft',
         ]);
 
-        // Generate slug automatically
-        $slug = Str::slug($validated['title']);
+        // Generate base slug from title
+        $baseSlug = Str::slug($validated['title']);
 
-        // Check if slug exists, if so, append a unique identifier
-        $count = News::where('slug', $slug)->count();
-        if ($count > 0) {
-            $slug = $slug . '-' . uniqid();
-        }
+        // Check if slug exists
+        $slug = $this->generateUniqueSlug($baseSlug);
+
+        Log::info('Creating news with unique slug: ' . $slug);
 
         $newsData = [
             'title' => $validated['title'],
@@ -129,7 +134,7 @@ class NewsService
             'author' => $validated['author'],
             'publish_date' => $validated['publish_date'],
             'news_category_id' => $validated['news_category_id'] ?? null,
-            'status' => $validated['status'] ?? 'published', // Add status with default
+            'status' => $validated['status'] ?? 'published',
         ];
 
         // Upload image if available
@@ -143,14 +148,52 @@ class NewsService
     }
 
     /**
-     * Update an existing news item
+     * Generate a unique slug for news
+     * @param string $baseSlug
+     * @param int $id
+     * @return string
+     */
+    private function generateUniqueSlug($baseSlug, $id = null)
+    {
+        // Check if base slug exists (excluding current news if ID provided)
+        $query = News::withoutGlobalScope('published')->where('slug', $baseSlug);
+
+        if ($id) {
+            $query->where('id', '!=', $id);
+        }
+
+        $exists = $query->exists();
+
+        if (!$exists) {
+            return $baseSlug;
+        }
+
+        // If exists, add a unique suffix
+        $counter = 1;
+        $newSlug = $baseSlug;
+
+        while (News::withoutGlobalScope('published')
+            ->where('slug', $newSlug)
+            ->when($id, function ($query) use ($id) {
+                return $query->where('id', '!=', $id);
+            })
+            ->exists()) {
+            $newSlug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $newSlug;
+    }
+
+    /**
+     * Update an existing news item with proper slug handling
      * @param Request $request
      * @param string $slug
      * @return array
      */
     public function updateNews(Request $request, $slug)
     {
-        $news = News::where('slug', $slug)->firstOrFail();
+        $news = News::withoutGlobalScope('published')->where('slug', $slug)->firstOrFail();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -159,21 +202,16 @@ class NewsService
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'publish_date' => 'required|date',
             'news_category_id' => 'nullable|exists:news_categories,id',
-            'status' => 'nullable|in:published,draft', // Added status validation
-            'delete_image' => 'nullable|boolean', // Add validation for delete_image flag
+            'status' => 'nullable|in:published,draft',
+            'delete_image' => 'nullable|boolean',
         ]);
 
         // Generate new slug if title has changed
         if ($news->title != $validated['title']) {
-            $newSlug = Str::slug($validated['title']);
+            $baseSlug = Str::slug($validated['title']);
+            $validated['slug'] = $this->generateUniqueSlug($baseSlug, $news->id);
 
-            // Check if new slug exists (excluding current news item)
-            $count = News::where('slug', $newSlug)->where('id', '!=', $news->id)->count();
-            if ($count > 0) {
-                $newSlug = $newSlug . '-' . uniqid();
-            }
-
-            $validated['slug'] = $newSlug;
+            Log::info('Updating news with new slug: ' . $validated['slug']);
         } else {
             $validated['slug'] = $news->slug;
         }
@@ -186,7 +224,7 @@ class NewsService
             'author' => $validated['author'],
             'publish_date' => $validated['publish_date'],
             'news_category_id' => $validated['news_category_id'] ?? null,
-            'status' => $validated['status'] ?? $news->status, // Keep existing status if not provided
+            'status' => $validated['status'] ?? $news->status,
         ];
 
         // Handle image deletion if requested
@@ -220,7 +258,7 @@ class NewsService
      */
     public function deleteNews($slug)
     {
-        $news = News::where('slug', $slug)->firstOrFail();
+        $news = News::withoutGlobalScope('published')->where('slug', $slug)->firstOrFail();
 
         // Delete image if exists
         if ($news->image_url) {
@@ -232,7 +270,6 @@ class NewsService
         return ['message' => 'News deleted successfully'];
     }
 
-
     /**
      * Search for news based on a query string
      * @param string $query
@@ -241,9 +278,11 @@ class NewsService
     public function searchNews($query)
     {
         return News::with('category')
-            ->where('title', 'like', "%{$query}%")
-            ->orWhere('content', 'like', "%{$query}%")
-            ->orWhere('author', 'like', "%{$query}%")
+            ->where(function($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                    ->orWhere('content', 'like', "%{$query}%")
+                    ->orWhere('author', 'like', "%{$query}%");
+            })
             ->orderBy('publish_date', 'desc')
             ->get()
             ->map(function ($news) {
@@ -258,7 +297,7 @@ class NewsService
                     'news_category_id' => $news->news_category_id,
                     'category_name' => $news->category ? $news->category->name : null,
                     'category_slug' => $news->category ? $news->category->slug : null,
-                    'status' => $news->status, // Added status field
+                    'status' => $news->status,
                 ];
             });
     }
@@ -272,9 +311,11 @@ class NewsService
     public function getPaginatedSearchResults($query, $perPage = 9)
     {
         return News::with('category')
-            ->where('title', 'like', "%{$query}%")
-            ->orWhere('content', 'like', "%{$query}%")
-            ->orWhere('author', 'like', "%{$query}%")
+            ->where(function($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                    ->orWhere('content', 'like', "%{$query}%")
+                    ->orWhere('author', 'like', "%{$query}%");
+            })
             ->orderBy('publish_date', 'desc')
             ->paginate($perPage);
     }
@@ -302,7 +343,7 @@ class NewsService
                     'news_category_id' => $news->news_category_id,
                     'category_name' => $news->category ? $news->category->name : null,
                     'category_slug' => $news->category ? $news->category->slug : null,
-                    'status' => $news->status, // Added status field
+                    'status' => $news->status,
                 ];
             });
     }
@@ -345,7 +386,7 @@ class NewsService
                     'publish_date' => $news->publish_date,
                     'category_name' => $news->category ? $news->category->name : null,
                     'category_slug' => $news->category ? $news->category->slug : null,
-                    'status' => $news->status, // Added status field
+                    'status' => $news->status,
                 ];
             });
     }
@@ -358,7 +399,7 @@ class NewsService
      */
     public function getRelatedNews($newsId, $limit = 3)
     {
-        $news = News::findOrFail($newsId);
+        $news = News::withoutGlobalScope('published')->findOrFail($newsId);
         $categoryId = $news->news_category_id;
 
         return News::with('category')
@@ -378,7 +419,7 @@ class NewsService
                     'publish_date' => $news->publish_date,
                     'category_name' => $news->category ? $news->category->name : null,
                     'category_slug' => $news->category ? $news->category->slug : null,
-                    'status' => $news->status, // Added status field
+                    'status' => $news->status,
                 ];
             });
     }
@@ -411,7 +452,7 @@ class NewsService
                     'publish_date' => $news->publish_date,
                     'category_name' => $news->category ? $news->category->name : null,
                     'category_slug' => $news->category ? $news->category->slug : null,
-                    'status' => $news->status, // Added status field
+                    'status' => $news->status,
                 ];
             });
     }
@@ -483,5 +524,32 @@ class NewsService
     public function generateExcerpt($content, $length = 150)
     {
         return Str::limit(strip_tags($content), $length);
+    }
+
+    /**
+     * Get all news items including drafts for admin purposes
+     * @return array
+     */
+    public function getAllNewsWithDrafts()
+    {
+        return News::withoutGlobalScope('published')
+            ->with('category')
+            ->orderBy('publish_date', 'desc')
+            ->get()
+            ->map(function ($news) {
+                return [
+                    'id' => $news->id,
+                    'title' => $news->title,
+                    'slug' => $news->slug,
+                    'content' => $news->content,
+                    'image_url' => $news->image_url,
+                    'author' => $news->author,
+                    'publish_date' => $news->publish_date,
+                    'news_category_id' => $news->news_category_id,
+                    'category_name' => $news->category ? $news->category->name : null,
+                    'category_slug' => $news->category ? $news->category->slug : null,
+                    'status' => $news->status,
+                ];
+            });
     }
 }
