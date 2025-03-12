@@ -3,35 +3,40 @@
     <x-slot:title>Client Management Dashboard</x-slot:title>
 
     <!-- Header -->
-    <header class="header-gradient text-white py-4 px-6">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center">
-                <h1 class="text-2xl font-bold">Client Manager</h1>
-                <span class="ml-4 px-2 py-1 bg-white/20 rounded text-xs">Admin Panel</span>
-            </div>
-            <div class="flex space-x-4">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center text-white hover:text-indigo-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                    </svg>
-                    Dashboard
-                </a>
-                <a href="{{ route('admin.insights') }}" class="flex items-center text-white hover:text-indigo-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clip-rule="evenodd" />
-                        <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />
-                    </svg>
-                    Articles
-                </a>
-                <a href="{{ route('admin.teams') }}" class="flex items-center text-white hover:text-indigo-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-                    </svg>
-                    Team
-                </a>
-            </div>
-        </div>
-    </header>
+
+    @include('Admin.Partials.AdminHeader', [
+    'title' => 'Client Manager',
+    'subtitle' => 'Admin Panel'
+])
+{{--    <header class="header-gradient text-white py-4 px-6">--}}
+{{--        <div class="container mx-auto flex justify-between items-center">--}}
+{{--            <div class="flex items-center">--}}
+{{--                <h1 class="text-2xl font-bold">Client Manager</h1>--}}
+{{--                <span class="ml-4 px-2 py-1 bg-white/20 rounded text-xs">Admin Panel</span>--}}
+{{--            </div>--}}
+{{--            <div class="flex space-x-4">--}}
+{{--                <a href="{{ route('admin.dashboard') }}" class="flex items-center text-white hover:text-indigo-100">--}}
+{{--                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">--}}
+{{--                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />--}}
+{{--                    </svg>--}}
+{{--                    Dashboard--}}
+{{--                </a>--}}
+{{--                <a href="{{ route('admin.insights') }}" class="flex items-center text-white hover:text-indigo-100">--}}
+{{--                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">--}}
+{{--                        <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clip-rule="evenodd" />--}}
+{{--                        <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />--}}
+{{--                    </svg>--}}
+{{--                    Articles--}}
+{{--                </a>--}}
+{{--                <a href="{{ route('admin.teams') }}" class="flex items-center text-white hover:text-indigo-100">--}}
+{{--                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">--}}
+{{--                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />--}}
+{{--                    </svg>--}}
+{{--                    Team--}}
+{{--                </a>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </header>--}}
 
     <!-- Main Content -->
     <main class="flex-grow container mx-auto px-6 py-8">

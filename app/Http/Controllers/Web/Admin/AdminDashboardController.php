@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\Client;
 use App\Models\GalleryImage;
 use App\Models\Insight;
+use App\Models\News;
+use App\Models\NewsCategory;
 use App\Models\Team;
 use App\Services\TrackingService;
 
@@ -39,6 +41,8 @@ class AdminDashboardController extends Controller
             'clients' => Client::count(),
             'gallery' => GalleryImage::count(),
             'carousel' => GalleryImage::where('is_carousel', true)->count(),
+            'news' => News::count(),
+            'news_categories' => NewsCategory::count(),
         ];
 
         // Get recent items
@@ -46,13 +50,15 @@ class AdminDashboardController extends Controller
         $recentTeams = Team::orderBy('created_at', 'desc')->take(5)->get();
         $recentClients = Client::orderBy('created_at', 'desc')->take(5)->get();
         $recentGallery = GalleryImage::orderBy('created_at', 'desc')->take(5)->get();
+        $recentNews = News::orderBy('created_at', 'desc')->take(5)->get();
 
         return view('Admin.index', compact(
             'stats',
             'recentInsights',
             'recentTeams',
             'recentClients',
-            'recentGallery'
+            'recentGallery',
+            'recentNews'
         ));
     }
 }

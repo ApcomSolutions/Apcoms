@@ -1,6 +1,31 @@
 /**
  * InsightCrud.js - JavaScript for the Insight Management Dashboard
  */
+
+// Konfigurasi Trix Editor hanya untuk gambar
+document.addEventListener('trix-initialize', function(event) {
+    // Dapatkan toolbar dari Trix Editor
+    const toolbarElement = event.target.toolbarElement;
+
+    // Tetapkan atribut accept untuk file input hanya menerima gambar
+    const fileInputs = toolbarElement.querySelectorAll('input[type=file]');
+    fileInputs.forEach(function(fileInput) {
+        fileInput.setAttribute('accept', 'image/*');
+    });
+});
+
+// Batasi upload hanya untuk gambar
+document.addEventListener('trix-file-accept', function(event) {
+    // Periksa apakah file yang diunggah adalah gambar
+    const file = event.file;
+    const acceptedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+
+    if (!file || !acceptedTypes.includes(file.type)) {
+        // Batalkan unggahan jika bukan gambar
+        event.preventDefault();
+        alert('Hanya file gambar yang dapat diunggah (JPG, PNG, GIF, WEBP, SVG)');
+    }
+});
 document.addEventListener('DOMContentLoaded', function() {
     // Check if we're on the insights management page
     const articlesTableBody = document.getElementById('articles-table-body');
@@ -121,6 +146,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Delete Image Button
+    const deleteImageBtn = document.getElementById('delete-image-btn');
+    if (deleteImageBtn) {
+        deleteImageBtn.addEventListener('click', function() {
+            // Set the hidden input value to 1 to indicate image should be deleted
+            const deleteImageInput = document.getElementById('delete_image');
+            if (deleteImageInput) {
+                deleteImageInput.value = '1';
+            }
+
+            // Hide the current image container
+            const currentImageContainer = document.getElementById('current-image-container');
+            if (currentImageContainer) {
+                currentImageContainer.classList.add('hidden');
+            }
+
+            // Reset the file input
+            const imageInput = document.getElementById('image');
+            if (imageInput) {
+                imageInput.value = '';
+            }
+        });
+    }
+
     // Modal handling
     const modals = document.querySelectorAll('.modal');
     const modalCloseButtons = document.querySelectorAll('.modal-close');
@@ -141,6 +190,42 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // Validasi untuk input gambar utama (featured image)
+    const imageInput = document.getElementById('image');
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const acceptedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+
+                if (!acceptedTypes.includes(file.type)) {
+                    alert('Hanya file gambar yang diperbolehkan (JPG, PNG, GIF, WEBP, SVG)');
+                    // Reset file input
+                    this.value = '';
+                } else {
+                    // Preview gambar jika valid
+                    const currentImage = document.getElementById('current-image');
+                    const currentImageContainer = document.getElementById('current-image-container');
+                    const deleteImageInput = document.getElementById('delete_image');
+
+                    if (deleteImageInput) {
+                        deleteImageInput.value = '0'; // Reset delete flag if a new image is selected
+                    }
+
+                    if (currentImage && currentImageContainer) {
+                        // Tampilkan preview gambar yang baru dipilih
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            currentImage.src = e.target.result;
+                            currentImageContainer.classList.remove('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            }
+        });
+    }
 
     // Fetch Articles from API
     async function fetchArticles() {
@@ -684,7 +769,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const completionBarElement = document.getElementById('modal-completion-bar');
             if (completionBarElement) completionBarElement.style.width = '0%';
-
             if (loadingElement) loadingElement.classList.add('hidden');
             if (statsElement) statsElement.classList.remove('hidden');
 
@@ -791,7 +875,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Create Views Chart for modal (fallback)
-// Create Views Chart for modal (fallback)
     function createViewsChart(insightId) {
         if (viewsChart) {
             viewsChart.destroy();
@@ -850,7 +933,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-// Create Device Chart for modal
+    // Create Device Chart for modal
     function createDeviceChart(deviceData = []) {
         console.log("Creating device chart with data:", deviceData);
 
@@ -939,7 +1022,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Device chart created successfully");
     }
 
-// Open Editor Modal
+    // Open Editor Modal
     async function openEditorModal(slug = null) {
         const modal = document.getElementById('editor-modal');
         if (!modal) {
@@ -952,10 +1035,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const formMethod = document.getElementById('form-method');
         const currentImageContainer = document.getElementById('current-image-container');
         const trixEditor = document.getElementById('isi-editor');
+        const deleteImageInput = document.getElementById('delete_image');
 
         if (!form || !editorTitle || !formMethod || !currentImageContainer || !trixEditor) {
             console.error('Required editor modal elements not found');
             return;
+        }
+
+        // Reset delete image flag
+        if (deleteImageInput) {
+            deleteImageInput.value = '0';
         }
 
         // Set the form's enctype attribute programmatically
@@ -1067,7 +1156,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     }
 
-// Open Delete Confirmation Modal
+    // Open Delete Confirmation Modal
     function openDeleteModal(slug, title) {
         const modal = document.getElementById('delete-modal');
         const titleElement = document.getElementById('delete-insight-title');
@@ -1085,7 +1174,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-// Save Insight (Create or Update) using API
+    // Save Insight (Create or Update) using API
     async function saveInsight() {
         const form = document.getElementById('insight-form');
         const formMethodElement = document.getElementById('form-method');
@@ -1104,6 +1193,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const slug = slugInput.value;
 
         try {
+            // PENTING: Pastikan URL dimulai dengan /api/ untuk mengakses API routes
             let url = '/api/insights';
             if (method === 'PUT') {
                 url = `/api/insights/${slug}`;
@@ -1112,6 +1202,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Add the CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             formData.append('_token', csrfToken);
 
             // Debug log
@@ -1145,56 +1236,70 @@ document.addEventListener('DOMContentLoaded', function() {
             const contentType = response.headers.get('content-type');
             console.log("Response content type:", contentType);
 
+            // PENTING: Clone response sebelum membacanya jika perlu membaca multiple kali
+            // atau cukup baca sekali saja dan simpan hasilnya
+
+            // Baca response berdasarkan content type
+            let result;
             if (contentType && contentType.includes('application/json')) {
-                // Handle JSON response
-                const result = await response.json();
-
-                if (!response.ok) {
-                    // Handle error response
-                    if (result.errors) {
-                        // Format validation errors
-                        const errorMessages = Object.values(result.errors).flat().join('\n');
-                        throw new Error(`Validation failed:\n${errorMessages}`);
-                    } else {
-                        throw new Error(result.message || 'Failed to save insight');
-                    }
-                }
-
-                // Success - close modal and refresh list
-                const editorModal = document.getElementById('editor-modal');
-                if (editorModal) {
-                    closeModal(editorModal);
-                }
-                fetchArticles();
-
-                // Show success message
-                alert(result.message || 'Insight saved successfully');
+                // Parse as JSON if content type is JSON
+                result = await response.json();
             } else {
-                // Handle non-JSON response (usually an error page)
-                const htmlResponse = await response.text();
-                console.error('Server returned HTML instead of JSON:', htmlResponse);
+                // Get as text if not JSON
+                const textResponse = await response.text();
+                console.log('Response text:', textResponse);
 
-                // Try to identify common error types
-                if (response.status === 419) {
-                    throw new Error('CSRF token mismatch. Please refresh the page and try again.');
-                } else if (response.status === 422) {
-                    throw new Error('Validation failed. Please check all fields and try again.');
-                } else if (response.status >= 500) {
-                    throw new Error('Server error. Please check the server logs.');
-                } else {
-                    throw new Error(`Unexpected response (status ${response.status}). Please try again.`);
+                // Coba parse JSON dari text response jika mungkin
+                try {
+                    result = JSON.parse(textResponse);
+                } catch (e) {
+                    console.error('Not valid JSON:', textResponse);
+                    // Untuk response non-JSON (HTML, dll), buat objek sederhana
+                    result = {
+                        success: response.ok,
+                        message: response.ok ? 'Operation successful' : 'Operation failed'
+                    };
                 }
             }
+
+            if (!response.ok) {
+                // Handle error response
+                if (result && result.errors) {
+                    // Format validation errors
+                    const errorMessages = Object.values(result.errors).flat().join('\n');
+                    throw new Error(`Validation failed:\n${errorMessages}`);
+                } else {
+                    throw new Error((result && result.message) || 'Failed to save insight');
+                }
+            }
+
+            // Success - close modal and refresh list
+            const editorModal = document.getElementById('editor-modal');
+            if (editorModal) {
+                closeModal(editorModal);
+            }
+            fetchArticles();
+
+            // Show success message
+            alert((result && result.message) || 'Insight saved successfully');
+
         } catch (error) {
             console.error('Error saving insight:', error);
             alert(`Error: ${error.message || 'Failed to save insight'}`);
         }
     }
 
-// Delete Insight using API
+
+    // Delete Insight using API
     async function deleteInsight(slug) {
         try {
-            const response = await fetch(`/api/insights/${slug}`, {
+            // PENTING: Pastikan URL dimulai dengan /api/ untuk mengakses API routes
+            const url = `/api/insights/${slug}`;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            console.log("Sending delete request to:", url);
+
+            const response = await fetch(url, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken || '',
@@ -1202,9 +1307,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
+            // Log response untuk debugging
+            console.log("Delete response status:", response.status);
+
+            let result;
+            try {
+                result = await response.json();
+                console.log("Delete response:", result);
+            } catch (error) {
+                const textResponse = await response.text();
+                console.error('Invalid JSON response:', textResponse);
+                throw new Error('Server returned an invalid response');
+            }
+
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to delete insight');
+                throw new Error(result.message || 'Failed to delete insight');
             }
 
             // Close modal and refresh list
@@ -1215,7 +1332,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchArticles();
 
             // Show success message
-            const result = await response.json();
             alert(result.message || 'Insight deleted successfully');
 
         } catch (error) {
@@ -1224,10 +1340,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-// Close modal
+    // Close modal
     function closeModal(modal) {
         modal.classList.remove('opacity-100', 'active');
         modal.classList.add('opacity-0', 'pointer-events-none');
+
+        // Reset delete_image value when modal is closed
+        if (modal.id === 'editor-modal') {
+            const deleteImageInput = document.getElementById('delete_image');
+            if (deleteImageInput) {
+                deleteImageInput.value = '0'; // Reset delete image flag when modal is closed
+            }
+        }
 
         // Destroy charts to prevent memory leaks
         if (viewsChart && modal.id === 'stats-modal') {
@@ -1241,13 +1365,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-// Format number with commas
+    // Format number with commas
     function formatNumber(num) {
         if (!num) return "0";
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-// Generate slug from title
+    // Generate slug from title
     function generateSlug(text) {
         return text
             .toString()
