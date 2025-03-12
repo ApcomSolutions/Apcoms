@@ -91,6 +91,83 @@ class TempUploadController extends Controller
     }
 
     /**
+     * Handle temporary image upload specifically for Trix editor
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeTrixAttachment(Request $request)
+    {
+        try {
+            // Validate the uploaded file
+            $validator = Validator::make($request->all(), [
+                'file' => 'required|image|mimes:jpg,jpeg,png,webp,gif|max:5120', // max 5MB
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first('file')
+                ], 422);
+            }
+
+            if (!$request->hasFile('file')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No file uploaded'
+                ], 400);
+            }
+
+            $image = $request->file('file');
+
+            // Log image information
+            Log::info('Trix image upload details:', [
+                'name' => $image->getClientOriginalName(),
+                'extension' => $image->getClientOriginalExtension(),
+                'mime' => $image->getMimeType(),
+                'size' => $image->getSize()
+            ]);
+
+            // Validate file using custom validator
+            $validationResult = FileValidator::validateImage($image);
+            if ($validationResult !== true) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validationResult
+                ], 422);
+            }
+
+            // Create trix-uploads folder if it doesn't exist
+            if (!Storage::disk('public')->exists('trix-uploads')) {
+                Storage::disk('public')->makeDirectory('trix-uploads');
+            }
+
+            // Create unique filename and save to folder
+            $originalName = FileValidator::sanitizeFilename($image->getClientOriginalName());
+            $filename = Str::random(20) . '_' . time() . '_' . $originalName;
+            $path = $image->storeAs('trix-uploads', $filename, 'public');
+
+            $url = Storage::disk('public')->url($path);
+
+            // Format response for Trix editor
+            return response()->json([
+                'url' => $url,
+                'href' => $url
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Trix upload error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error uploading file: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Handle cancellation of temporary uploads
      *
      * @param Request $request

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\NewsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\News;
 
 class NewsController extends Controller
 {
@@ -17,28 +18,22 @@ class NewsController extends Controller
 
     /**
      * Display a listing of all news
+     * For admin routes, will show all news including drafts
+     * For public routes, will only show published news
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function showAllNews()
     {
-        $news = $this->newsService->getAllNews();
+        // If it's an admin route, get all news including drafts
+        if (request()->is('api/admin*')) {
+            $news = $this->newsService->getAllNewsWithDrafts();
+        } else {
+            $news = $this->newsService->getAllNews();
+        }
+
         return response()->json($news);
     }
-
-    /**
-     * Display a paginated listing of news
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getPaginatedNews(Request $request)
-    {
-        $perPage = $request->input('per_page', 9);
-        $news = $this->newsService->getPaginatedNews($perPage);
-        return response()->json($news);
-    }
-
     /**
      * Display the specified news by ID
      *
@@ -293,4 +288,35 @@ class NewsController extends Controller
             'excerpt' => $excerpt
         ]);
     }
+
+    /**
+     * Display a listing of all news including drafts for admin
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAllNewsWithDrafts()
+    {
+        $news = News::withoutGlobalScope('published')
+            ->with('category')
+            ->orderBy('publish_date', 'desc')
+            ->get()
+            ->map(function ($news) {
+                return [
+                    'id' => $news->id,
+                    'title' => $news->title,
+                    'slug' => $news->slug,
+                    'content' => $news->content,
+                    'image_url' => $news->image_url,
+                    'author' => $news->author,
+                    'publish_date' => $news->publish_date,
+                    'news_category_id' => $news->news_category_id,
+                    'category_name' => $news->category ? $news->category->name : null,
+                    'category_slug' => $news->category ? $news->category->slug : null,
+                    'status' => $news->status,
+                ];
+            });
+
+        return response()->json($news);
+    }
+
 }
