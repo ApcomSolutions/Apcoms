@@ -137,7 +137,7 @@
             player = new YT.Player('youtube-player', {
                 height: '100%',
                 width: '100%',
-                videoId: 'VIDEO_ID', // Ganti dengan ID video YouTube
+                videoId: '2SYn0WxJ0rA', // Ganti dengan ID video YouTube
                 playerVars: {
                     'autoplay': 0,
                     'rel': 0
@@ -147,11 +147,14 @@
     </script>
     <x-footer></x-footer>
 
+    {{-- HAPUS @push ini karena file CSS/JS sudah dimuat via Vite di layout utama --}}
+    {{--
     @push('styles')
-        <link rel="stylesheet" href="{{ asset('css/team.css') }}">
+        <link rel="stylesheet" href="{{ asset('resources/css/team.css') }}">
     @endpush
 
     @push('scripts')
         <script src="{{ asset('js/team.js') }}"></script>
     @endpush
+    --}}
 </x-layout>

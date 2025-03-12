@@ -1,6 +1,13 @@
 /**
  * CategoryCrud.js - JavaScript for the Category Management Dashboard
  */
+
+if (!window.location.pathname.includes('/admin/categories')) {
+    console.log('Not on insights categories page, skipping initialization');
+    // Exit early to prevent any code from running
+    throw new Error('Skipping script - not on insights categories page');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Check if we're on the categories management page
     const categoriesTableBody = document.getElementById('categories-table-body');

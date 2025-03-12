@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
 
-class CategoryController extends Controller {
+class InsightCategoryController extends Controller {
 
     protected $categoryService;
 
