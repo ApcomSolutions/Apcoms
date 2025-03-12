@@ -2,7 +2,7 @@
  * News Management Module - Complete Version
  * Handles CRUD operations and Analytics for News
  */
-
+axios.defaults.headers.common['X-Admin-Request'] = 'true';
 document.addEventListener('DOMContentLoaded', function() {
     // State
     let news = [];
@@ -130,27 +130,125 @@ document.addEventListener('DOMContentLoaded', function() {
         const trixEditor = document.querySelector('trix-editor');
         if (!trixEditor) return;
 
-        // Handle attachments and prevent file attachment that we'll handle separately
+        // Handle attachments for images
         trixEditor.addEventListener('trix-attachment-add', function(event) {
             const attachment = event.attachment;
             if (attachment.file) {
-                // Prevent default attachment handling
-                attachment.remove();
-
-                // Let the user know we're using the file upload field instead
-                alert('Please use the Featured Image upload field for images.');
+                // Handle image uploads
+                if (attachment.file.type.match(/image/)) {
+                    console.log('Image file added:', attachment.file);
+                    uploadTrixAttachment(attachment);
+                } else {
+                    // Non-image files not supported
+                    attachment.remove();
+                    alert('Only image files are supported for insertion in content.');
+                }
             }
         });
 
-        // Add proper event listener to populate hidden input
+        // Add event listener to ensure content is always updated properly
         trixEditor.addEventListener('trix-change', function() {
             const contentInput = document.getElementById('content-input');
             if (contentInput) {
-                contentInput.value = this.editor.getDocument().toString();
+                // Store clean content in the hidden input field for form submission
+                contentInput.value = cleanTrixContent(this.editor.getDocument().toString());
             }
         });
     }
 
+
+    /**
+     * Clean Trix content by removing admin UI elements and metadata
+     *
+     * @param {string} content - The raw content from Trix editor
+     * @return {string} - Cleaned content without admin UI elements
+     */
+    function cleanTrixContent(content) {
+        // Create a temporary DOM element to manipulate the content
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+
+        // Remove any admin UI elements that might be in the content
+        const adminElements = tempDiv.querySelectorAll('.admin-ui, [data-admin-element], figcaption');
+        adminElements.forEach(el => el.remove());
+
+        // Clean up any file information or remove text
+        const cleanedContent = tempDiv.innerHTML
+            .replace(/Remove\s*MengAstronot\d+\.png\s*\d+\.\d+\s*KB/g, '')
+            .replace(/Add a caption\.\.\./g, '')
+            .replace(/Remove/g, '')
+            .replace(/\d+\.\d+\s*KB/g, '');
+
+        return cleanedContent;
+    }
+
+    /**
+     * Upload attachment file from Trix editor
+     */
+    function uploadTrixAttachment(attachment) {
+        const file = attachment.file;
+        const form = new FormData();
+        form.append('file', file);
+
+        // Log for debugging
+        console.log('Uploading file to Trix:', file.name, 'type:', file.type);
+
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        form.append('_token', token);
+
+        // Show upload progress
+        attachment.setUploadProgress(0);
+
+        // Send file to dedicated Trix endpoint
+        fetch('/api/trix-uploads', {
+            method: 'POST',
+            body: form,
+            headers: {
+                'X-CSRF-TOKEN': token,
+                'X-Admin-Request': 'true'
+            }
+        })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('Upload failed with status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Log complete response
+                console.log('Server response for Trix upload:', data);
+
+                // Check if data has URL
+                if (!data.url) {
+                    console.error('Response missing URL:', data);
+                    throw new Error('Server response missing URL');
+                }
+
+                // Log URL to be used
+                console.log('Setting Trix attachment URL to:', data.url);
+
+                // Update attachment with URL from server and add necessary attributes
+                attachment.setAttributes({
+                    url: data.url,
+                    href: data.url
+                });
+
+                // Add a class to identify admin elements that should be removed during saving
+                attachment.setAttributes({
+                    'data-admin-element': 'true'
+                });
+            })
+            .catch(error => {
+                console.error('Error uploading file to Trix:', error);
+                attachment.remove();
+                alert('Failed to upload image: ' + error.message);
+            })
+            .finally(() => {
+                attachment.setUploadProgress(100);
+                console.log('Upload process complete');
+            });
+    }
 
 
     /**
@@ -371,23 +469,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const newsTable = document.getElementById('news-table-body');
             if (newsTable) {
                 newsTable.innerHTML = `
-                <tr>
-                    <td colspan="6" class="py-10 text-center text-gray-500">
-                        <div class="flex justify-center">
-                            <svg class="h-10 w-10 text-gray-400 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </div>
-                        <div class="mt-2">Loading news items...</div>
-                    </td>
-                </tr>
-            `;
+            <tr>
+                <td colspan="6" class="py-10 text-center text-gray-500">
+                    <div class="flex justify-center">
+                        <svg class="h-10 w-10 text-gray-400 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                    <div class="mt-2">Loading news items...</div>
+                </td>
+            </tr>
+        `;
             }
 
             // Add cache buster to prevent caching
             const timestamp = new Date().getTime();
-            const response = await fetch(`/api/news?_=${timestamp}`);
+
+            // Use admin endpoint to get all news including drafts
+            const response = await fetch(`/api/admin/news/all?_=${timestamp}`);
             if (!response.ok) throw new Error('Failed to fetch news');
 
             const data = await response.json();
@@ -409,16 +509,16 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error fetching news:', error);
             if (newsTable) {
                 newsTable.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center py-10">
-                        <svg class="mx-auto h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <h3 class="mt-2 text-lg font-medium text-red-800">Error loading news</h3>
-                        <p class="mt-1 text-gray-500">Please try again or refresh the page.</p>
-                    </td>
-                </tr>
-            `;
+            <tr>
+                <td colspan="6" class="text-center py-10">
+                    <svg class="mx-auto h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h3 class="mt-2 text-lg font-medium text-red-800">Error loading news</h3>
+                    <p class="mt-1 text-gray-500">Please try again or refresh the page.</p>
+                </td>
+            </tr>
+        `;
             }
         }
     }
@@ -933,8 +1033,139 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
+    // /**
+    //  * Save News (Create or Update) using API
+    //  */
+    // async function saveNews() {
+    //     const form = document.getElementById('news-form');
+    //     const formMethodElement = document.getElementById('form-method');
+    //     if (!form || !formMethodElement) return;
+    //
+    //     const formData = new FormData(form);
+    //     const method = formMethodElement.value;
+    //
+    //     // Get content from Trix Editor
+    //     const trixEditor = document.querySelector('trix-editor');
+    //     const contentInput = document.getElementById('content-input');
+    //     if (trixEditor && contentInput) {
+    //         // Make sure we have the latest content
+    //         formData.set('content', trixEditor.editor.getDocument().toString());
+    //     }
+    //
+    //     // IMPORTANT: Explicitly get the status value and add it to the form data
+    //     const statusSelect = document.getElementById('status');
+    //     if (statusSelect) {
+    //         const statusValue = statusSelect.value || 'published';
+    //         console.log('Status selected:', statusValue); // Debug log
+    //         formData.set('status', statusValue);
+    //     } else {
+    //         // If for some reason the select element is missing, default to published
+    //         formData.set('status', 'published');
+    //     }
+    //
+    //     // Add CSRF token explicitly to the FormData
+    //     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    //     formData.append('_token', csrfToken);
+    //
+    //     // Make sure delete_image is included
+    //     const deleteImageInput = document.getElementById('delete_image');
+    //     if (deleteImageInput) {
+    //         console.log('Delete image flag:', deleteImageInput.value);
+    //     }
+    //
+    //     // Log all form data for debugging
+    //     console.log('Form data entries:');
+    //     for (let pair of formData.entries()) {
+    //         console.log(pair[0] + ': ' + pair[1]);
+    //     }
+    //
+    //     try {
+    //         let url = '/api/news';
+    //         let requestMethod = 'POST';
+    //
+    //         if (method === 'PUT' && currentNewsSlug) {
+    //             url = `/api/news/${currentNewsSlug}`;
+    //             requestMethod = 'POST'; // Change to POST for file uploads with PUT intention
+    //             formData.append('_method', 'PUT'); // Laravel will interpret this as PUT
+    //         }
+    //
+    //         // Disable save button and show loading state
+    //         const saveButton = document.getElementById('save-news-btn');
+    //         if (saveButton) {
+    //             saveButton.disabled = true;
+    //             saveButton.innerHTML = `
+    //             <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    //                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    //                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    //             </svg>
+    //             Saving...
+    //         `;
+    //         }
+    //
+    //         const response = await fetch(url, {
+    //             method: requestMethod,
+    //             headers: {
+    //                 'X-CSRF-TOKEN': csrfToken,
+    //                 // Do NOT include Content-Type header when using FormData
+    //             },
+    //             body: formData
+    //         });
+    //
+    //         // Re-enable save button
+    //         if (saveButton) {
+    //             saveButton.disabled = false;
+    //             saveButton.innerHTML = 'Save';
+    //         }
+    //
+    //         // Check if response is JSON
+    //         const contentType = response.headers.get("content-type");
+    //         let result;
+    //
+    //         if (contentType && contentType.includes("application/json")) {
+    //             result = await response.json();
+    //         } else {
+    //             // Handle non-JSON response (likely an error)
+    //             const text = await response.text();
+    //             console.error("Server returned non-JSON response:", text.slice(0, 500));
+    //             throw new Error(`Server error: ${response.status} ${response.statusText}`);
+    //         }
+    //
+    //         if (!response.ok) {
+    //             if (result.errors) {
+    //                 // Format validation errors for better display
+    //                 const errorMessages = Object.entries(result.errors)
+    //                     .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
+    //                     .join('\n');
+    //                 throw new Error(`Validation errors:\n${errorMessages}`);
+    //             }
+    //             throw new Error(result.message || `Error ${response.status}: Failed to save news article`);
+    //         }
+    //
+    //         // Close modal and refresh list
+    //         const editorModal = document.getElementById('news-editor-modal');
+    //         if (editorModal) closeModal(editorModal);
+    //
+    //         // Force fetch news data again to refresh UI with fresh data
+    //         await fetchNews();
+    //
+    //         // Show success message
+    //         alert(result.message || 'News article saved successfully');
+    //
+    //     } catch (error) {
+    //         console.error('Error saving news:', error);
+    //         alert(`Error: ${error.message || 'Failed to save news article'}`);
+    //
+    //         // Re-enable save button if still disabled
+    //         const saveButton = document.getElementById('save-news-btn');
+    //         if (saveButton && saveButton.disabled) {
+    //             saveButton.disabled = false;
+    //             saveButton.innerHTML = 'Save';
+    //         }
+    //     }
+    // }
+
     /**
-     * Save News (Create or Update) using API
+     * Save news article with properly cleaned content
      */
     async function saveNews() {
         const form = document.getElementById('news-form');
@@ -944,12 +1175,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData(form);
         const method = formMethodElement.value;
 
-        // Get content from Trix Editor
+        // Get content from Trix Editor - FIXED
         const trixEditor = document.querySelector('trix-editor');
         const contentInput = document.getElementById('content-input');
         if (trixEditor && contentInput) {
-            // Make sure we have the latest content
-            formData.set('content', trixEditor.editor.getDocument().toString());
+            // Get content from Trix editor and ensure it's properly cleaned
+            const editorContent = trixEditor.innerHTML;
+            const cleanedContent = cleanTrixContent(editorContent);
+            formData.set('content', cleanedContent);
+
+            // Log for debugging
+            console.log('Captured and cleaned Trix content for submission:', {
+                length: cleanedContent.length,
+                sample: cleanedContent.substring(0, 200) + (cleanedContent.length > 200 ? '...' : '')
+            });
         }
 
         // IMPORTANT: Explicitly get the status value and add it to the form data
@@ -973,12 +1212,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Delete image flag:', deleteImageInput.value);
         }
 
-        // Log all form data for debugging
-        console.log('Form data entries:');
-        for (let pair of formData.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
-        }
-
         try {
             let url = '/api/news';
             let requestMethod = 'POST';
@@ -994,12 +1227,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (saveButton) {
                 saveButton.disabled = true;
                 saveButton.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Saving...
-            `;
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Saving...
+        `;
             }
 
             const response = await fetch(url, {

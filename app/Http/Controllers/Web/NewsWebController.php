@@ -23,27 +23,12 @@ class NewsWebController extends Controller
     }
 
     /**
-     * Filter news to only show published ones
-     * @param array $newsArray
-     * @return array
-     */
-    private function filterPublishedNews($newsArray)
-    {
-        return collect($newsArray)->filter(function ($item) {
-            return $item['status'] === 'published';
-        })->values()->all();
-    }
-
-    /**
      * Display a listing of the news.
      */
     public function index(Request $request)
     {
-        // Get all news from service
-        $allNews = $this->newsService->getAllNews();
-
-        // Filter to only show published news
-        $news = $this->filterPublishedNews($allNews);
+        // Get all news from service - will respect global scope and only show published
+        $news = $this->newsService->getAllNews();
 
         $categories = NewsCategory::withCount('news')->get();
 
@@ -67,18 +52,15 @@ class NewsWebController extends Controller
      */
     public function show(string $slug, Request $request)
     {
-        // Get raw news model instead of array
-        // For the detail page, we should check status before displaying
+        // Global scope will automatically filter for published only
         $news = News::with('category')
             ->where('slug', $slug)
-            ->where('status', 'published') // Only show published news
             ->firstOrFail();
 
         $categories = NewsCategory::withCount('news')->get();
 
-        // Get related news articles and filter them
-        $allRelatedNews = $this->newsService->getRelatedNews($news->id, 4);
-        $relatedNews = $this->filterPublishedNews($allRelatedNews);
+        // Get related news articles (will respect global scope)
+        $relatedNews = $this->newsService->getRelatedNews($news->id, 4);
 
         // Create a tracking record and pass it to the view
         $trackingService = app(NewsTrackingService::class);
@@ -98,11 +80,8 @@ class NewsWebController extends Controller
         $query = $request->input('query');
         $category = $request->input('category'); // Optional category filter
 
-        // Get search results from service
-        $allResults = $this->newsService->searchNews($query);
-
-        // Filter to only show published news
-        $news = $this->filterPublishedNews($allResults);
+        // Get search results from service (will respect global scope)
+        $news = $this->newsService->searchNews($query);
 
         $categories = NewsCategory::withCount('news')->get();
 
@@ -137,9 +116,8 @@ class NewsWebController extends Controller
     {
         $category = NewsCategory::where('slug', $slug)->firstOrFail();
 
-        // For better performance, we could modify this to use the service
+        // Global scope will filter for published articles only
         $news = News::where('news_category_id', $category->id)
-            ->where('status', 'published') // Only show published news
             ->with('category')
             ->get()
             ->map(function ($item) {
