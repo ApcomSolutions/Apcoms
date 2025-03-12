@@ -64,7 +64,7 @@ class InsightService
             'slug' => 'required|string|unique:insights,slug',
             'isi' => 'required|string',
             'penulis' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'TanggalTerbit' => 'required|date',
             'category_id' => 'nullable|exists:categories,id',
         ]);
@@ -92,12 +92,22 @@ class InsightService
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
             'TanggalTerbit' => 'required|date',
             'category_id' => 'nullable|exists:categories,id',
+            'delete_image' => 'nullable|boolean',
         ]);
 
-        $insightData = collect($validated)->except('image')->toArray();
+        $insightData = collect($validated)->except(['image', 'delete_image'])->toArray();
 
+        // Handle image deletion if requested
+        if ($request->boolean('delete_image') && $insight->image_url) {
+            // Delete the image from storage
+            $oldPath = str_replace('/storage/', '', $insight->image_url);
+            Storage::disk('public')->delete($oldPath);
+
+            // Set image_url to null in the database
+            $insightData['image_url'] = null;
+        }
         // Upload gambar baru jika ada
-        if ($request->hasFile('image')) {
+        elseif ($request->hasFile('image')) {
             // Hapus gambar lama jika ada
             if ($insight->image_url) {
                 $oldPath = str_replace('/storage/', '', $insight->image_url);

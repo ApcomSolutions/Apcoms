@@ -41,8 +41,45 @@ class TeamService
             // Log after validation
             Log::info('Validated team data:', $teamData);
 
-            // Upload image if provided
-            if ($request->hasFile('image')) {
+            // Proses gambar sementara jika menggunakan Dropzone
+            if ($request->has('temp_image_path')) {
+                $tempPath = $request->input('temp_image_path');
+
+                // Validasi path untuk keamanan
+                if (!Str::startsWith($tempPath, 'temp/') || Str::contains($tempPath, '..')) {
+                    throw new \Exception('Invalid temporary file path');
+                }
+
+                // Pastikan file ada
+                if (!Storage::disk('public')->exists($tempPath)) {
+                    throw new \Exception('Temporary file not found');
+                }
+
+                // Pindahkan dari folder temp ke folder teams
+                $filename = Str::random(20) . '_' . time() . '.' . pathinfo($tempPath, PATHINFO_EXTENSION);
+                $finalPath = 'teams/' . $filename;
+
+                // Buat folder jika belum ada
+                if (!Storage::disk('public')->exists('teams')) {
+                    Storage::disk('public')->makeDirectory('teams');
+                }
+
+                // Pindahkan file
+                Storage::disk('public')->copy($tempPath, $finalPath);
+
+                // Hapus file temp
+                Storage::disk('public')->delete($tempPath);
+
+                // Set image_url
+                $teamData['image_url'] = '/storage/' . $finalPath;
+
+                Log::info('File moved from temp to teams:', [
+                    'temp_path' => $tempPath,
+                    'final_path' => $finalPath
+                ]);
+            }
+            // Upload image dengan cara tradisional jika tidak menggunakan Dropzone
+            else if ($request->hasFile('image')) {
                 $image = $request->file('image');
 
                 // Log image information
@@ -208,8 +245,56 @@ class TeamService
             $team = Team::findOrFail($id);
             $teamData = $this->validateAndPrepareData($request);
 
-            // Upload new image if provided
-            if ($request->hasFile('image')) {
+            // Handle temp image if provided via Dropzone
+            if ($request->has('temp_image_path')) {
+                $tempPath = $request->input('temp_image_path');
+
+                // Validasi path untuk keamanan
+                if (!Str::startsWith($tempPath, 'temp/') || Str::contains($tempPath, '..')) {
+                    throw new \Exception('Invalid temporary file path');
+                }
+
+                // Pastikan file ada
+                if (!Storage::disk('public')->exists($tempPath)) {
+                    throw new \Exception('Temporary file not found');
+                }
+
+                // Delete old image if exists
+                if ($team->image_url) {
+                    $oldPath = str_replace('/storage/', '', $team->image_url);
+                    Storage::disk('public')->delete($oldPath);
+
+                    // Also delete any fallback images
+                    $oldPathWithoutExt = pathinfo($oldPath, PATHINFO_DIRNAME) . '/' . pathinfo($oldPath, PATHINFO_FILENAME);
+                    Storage::disk('public')->delete($oldPathWithoutExt . '.jpg');
+                    Storage::disk('public')->delete($oldPathWithoutExt . '.webp');
+                }
+
+                // Pindahkan dari folder temp ke folder teams
+                $filename = Str::random(20) . '_' . time() . '.' . pathinfo($tempPath, PATHINFO_EXTENSION);
+                $finalPath = 'teams/' . $filename;
+
+                // Buat folder jika belum ada
+                if (!Storage::disk('public')->exists('teams')) {
+                    Storage::disk('public')->makeDirectory('teams');
+                }
+
+                // Pindahkan file
+                Storage::disk('public')->copy($tempPath, $finalPath);
+
+                // Hapus file temp
+                Storage::disk('public')->delete($tempPath);
+
+                // Set image_url
+                $teamData['image_url'] = '/storage/' . $finalPath;
+
+                Log::info('File moved from temp to teams for update:', [
+                    'temp_path' => $tempPath,
+                    'final_path' => $finalPath
+                ]);
+            }
+            // Upload new image if provided via traditional method
+            else if ($request->hasFile('image')) {
                 // Delete old image if exists
                 if ($team->image_url) {
                     $oldPath = str_replace('/storage/', '', $team->image_url);
@@ -412,12 +497,18 @@ class TeamService
 
     private function validateAndPrepareData(Request $request)
     {
-        return $request->validate([
+        $rules = [
             'name' => 'required|string|max:100',
             'position' => 'required|string|max:100',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:10240',
             'is_active' => 'nullable|boolean',
             'order' => 'nullable|integer',
-        ]);
+        ];
+
+        // Hanya validasi file jika tidak menggunakan temp_image_path
+        if (!$request->has('temp_image_path')) {
+            $rules['image'] = 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:5120';
+        }
+
+        return $request->validate($rules);
     }
 }

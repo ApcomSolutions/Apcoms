@@ -1,10 +1,16 @@
 <?php
+// File: routes/web.php
+
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Web\Admin\AdminDashboardController;
 use App\Http\Controllers\Web\InsightWebController;
 use App\Http\Controllers\Web\Admin\InsightAdminController;
 use App\Http\Controllers\Web\Admin\CategoryAdminController;
+use App\Models\News;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\Admin\NewsAdminCategoryController;
+
 
 // 🏠 Home route
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -38,9 +44,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 
+Route::prefix('admin/news')->name('admin.news.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Web\Admin\NewsAdminController::class, 'index'])->name('index');
+    Route::get('/categories', [NewsAdminCategoryController::class, 'index'])->name('categories');
+});
 
-
-//ini dari fe
+// Rute halaman statis
 Route::get('/about', function () {
     return view('about');
 });
@@ -49,14 +58,13 @@ Route::get('/contact', function () {
     return view('contact');
 });
 
-// Untuk menampilkan form lupa password (opsional jika Anda menggunakan Alpine.js seperti di atas)
+// Untuk menampilkan form lupa password
 Route::get('/login', function () {
     return view('login.index');
 })->name('login');
 
 // Untuk memproses permintaan reset password
 Route::post('/login', [PasswordResetController::class, 'sendOTP'])->name('login.forgot-password');
-
 
 // Menampilkan halaman verifikasi OTP
 Route::get('/verify-otp', function () {
@@ -72,7 +80,6 @@ Route::post('/verify-otp', [PasswordResetController::class, 'verifyOTP'])->name(
 // Mengirim ulang OTP
 Route::post('/resend-otp', [PasswordResetController::class, 'resendOTP'])->name('login.resend-otp');
 
-
 Route::get('/penerbitskt', function () {
     return view('penerbitskt.index');
 })->name('penerbitskt');
@@ -82,5 +89,16 @@ Route::get('/penerbitskt/layanan', function () {
 })->name('penerbitskt.layanan');
 
 
+Route::prefix('admin/news')->name('admin.news.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Web\Admin\NewsAdminController::class, 'index'])->name('index');
+    Route::get('/categories', [NewsAdminCategoryController::class, 'index'])->name('categories');
+});
 
+// 📰 Routes untuk halaman website (News)
+Route::prefix('news')->name('news.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Web\NewsWebController::class, 'index'])->name('index');
+    Route::get('/category/{slug}', [App\Http\Controllers\Web\NewsWebController::class, 'category'])->name('category');
+    Route::get('/search', [App\Http\Controllers\Web\NewsWebController::class, 'search'])->name('search');
+    Route::get('/{slug}', [App\Http\Controllers\Web\NewsWebController::class, 'show'])->name('show');
+});
 

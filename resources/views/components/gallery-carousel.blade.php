@@ -5,11 +5,17 @@ use App\Services\GalleryService;
 use Illuminate\Support\Facades\App;
 
 // Get carousel images from the GalleryService
-$galleryService = App::make(GalleryService::class);
-$carouselImages = $galleryService->getCarouselImages();
+try {
+    $galleryService = App::make(GalleryService::class);
+    $carouselImages = $galleryService->getCarouselImages();
+} catch (\Exception $e) {
+    // Log the error
+    \Illuminate\Support\Facades\Log::error('Error loading carousel images: ' . $e->getMessage());
+    $carouselImages = [];
+}
 ?>
 
-<div class="container mx-auto px-4">
+<div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold text-center mb-8">Team Activity Documentation</h1>
 
     <!-- Carousel Container -->
@@ -62,3 +68,100 @@ $carouselImages = $galleryService->getCarouselImages();
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Debug logging
+        console.log('Gallery carousel initialized');
+        @if(count($carouselImages) > 0)
+        console.log('Loaded {{count($carouselImages)}} carousel images');
+        @else
+        console.log('No carousel images found');
+        @endif
+
+        const carousel = document.getElementById('activityCarousel');
+        if (!carousel) return;
+
+        const items = carousel.querySelectorAll('.carousel-item');
+        const indicators = carousel.querySelectorAll('[data-slide]');
+        const prevBtn = carousel.querySelector('.carousel-control-prev');
+        const nextBtn = carousel.querySelector('.carousel-control-next');
+
+        let currentIndex = 0;
+        const totalItems = items.length;
+
+        if (totalItems <= 1) return; // No need for controls if only one item
+
+        // Function to show specific slide
+        function showSlide(index) {
+            // Normalize index
+            if (index >= totalItems) index = 0;
+            if (index < 0) index = totalItems - 1;
+
+            // Update current index
+            currentIndex = index;
+
+            // Update carousel items
+            items.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.remove('opacity-0', 'translate-x-full', '-translate-x-full');
+                    item.classList.add('opacity-100', 'translate-x-0');
+                } else if (i < index) {
+                    item.classList.remove('opacity-100', 'translate-x-0', 'translate-x-full');
+                    item.classList.add('opacity-0', '-translate-x-full');
+                } else {
+                    item.classList.remove('opacity-100', 'translate-x-0', '-translate-x-full');
+                    item.classList.add('opacity-0', 'translate-x-full');
+                }
+            });
+
+            // Update indicators
+            indicators.forEach((indicator, i) => {
+                if (i === index) {
+                    indicator.classList.add('active', 'bg-opacity-100');
+                    indicator.classList.remove('bg-opacity-50');
+                } else {
+                    indicator.classList.remove('active', 'bg-opacity-100');
+                    indicator.classList.add('bg-opacity-50');
+                }
+            });
+        }
+
+        // Event handlers for controls
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                showSlide(currentIndex - 1);
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                showSlide(currentIndex + 1);
+            });
+        }
+
+        // Event handlers for indicators
+        indicators.forEach((indicator) => {
+            indicator.addEventListener('click', () => {
+                const slideIndex = parseInt(indicator.getAttribute('data-slide'));
+                showSlide(slideIndex);
+            });
+        });
+
+        // Auto-advance the carousel
+        let interval = setInterval(() => {
+            showSlide(currentIndex + 1);
+        }, 5000);
+
+        // Pause auto-advance on hover
+        carousel.addEventListener('mouseenter', () => {
+            clearInterval(interval);
+        });
+
+        carousel.addEventListener('mouseleave', () => {
+            interval = setInterval(() => {
+                showSlide(currentIndex + 1);
+            }, 5000);
+        });
+    });
+</script>

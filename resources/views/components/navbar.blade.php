@@ -84,7 +84,8 @@
                         <div class="py-1">
                             <a href="{{ route('insights.index') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Insight</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">News</a>
+                            <a href="{{ route('news.index') }}"
+                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">News</a>
                         </div>
                     </div>
                 </div>
