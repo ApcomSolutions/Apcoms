@@ -65,7 +65,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
-    <title>{{ $title ?? 'APCOM Solutions' }}</title>
+    <title>{{ $title ?? 'ApCom Solutions - Membangun Reputasi Menciptakan Solusi' }}</title>
 
     <style>
         html {

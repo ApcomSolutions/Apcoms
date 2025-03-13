@@ -4,9 +4,7 @@
         font-family: 'Inter', sans-serif;
         background-color: #f9fafb;
     }
-    .wakatime-gradient {
-        background: linear-gradient(135deg, #2563eb, #4f46e5);
-    }
+    /* Menghapus class wakatime-gradient dan menggunakan header-gradient yang sama dengan halaman admin lain */
     .card {
         background-color: white;
         border-radius: 0.5rem;
