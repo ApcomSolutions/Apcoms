@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -35,6 +36,9 @@ class PasswordResetController extends Controller
                 ->withInput();
         }
 
+        // Pastikan tidak ada kode yang menggunakan OtpMail di sini
+        // Misalnya: Mail::to($request->email)->send(new OtpMail($otp));
+
         $result = $this->authService->sendOTP($request->email);
 
         if (!$result['success']) {
@@ -43,11 +47,30 @@ class PasswordResetController extends Controller
                 ->withInput();
         }
 
-        // Simpan email di session untuk halaman verifikasi
-        session(['email' => $request->email]);
+        return back()
+            ->with('status', 'Kami telah mengirimkan link dan kode OTP ke email Anda.');
+    }
 
-        return redirect()->route('login.verify-otp.form')
-            ->with('success', 'Kami telah mengirimkan kode OTP ke email Anda.');
+    /**
+     * Menampilkan form verifikasi OTP
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function showVerifyOtpForm(Request $request)
+    {
+        $email = $request->email;
+        $token = $request->token;
+
+        if (!$email || !$token) {
+            return redirect()->route('login')
+                ->with('error', 'Link reset password tidak valid.');
+        }
+
+        return view('login.verify-otp', [
+            'email' => $email,
+            'token' => $token
+        ]);
     }
 
     /**
@@ -67,6 +90,8 @@ class PasswordResetController extends Controller
         $request->merge(['otp' => $otp]);
 
         $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+            'token' => 'required|string',
             'otp' => 'required|string|size:6',
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -77,15 +102,8 @@ class PasswordResetController extends Controller
                 ->withInput();
         }
 
-        $email = session('email');
-
-        if (!$email) {
-            return redirect()->route('login')
-                ->with('error', 'Sesi telah berakhir. Silakan ulangi proses reset password.');
-        }
-
-        // Verifikasi OTP
-        $verifyResult = $this->authService->verifyOTP($email, $request->otp);
+        // Verifikasi OTP dan token
+        $verifyResult = $this->authService->verifyOTP($request->email, $request->otp);
 
         if (!$verifyResult['success']) {
             return back()
@@ -93,9 +111,9 @@ class PasswordResetController extends Controller
                 ->withInput();
         }
 
-        // Reset password
+        // Reset password dengan token hasil verifikasi
         $resetResult = $this->authService->resetPassword(
-            $email,
+            $request->email,
             $verifyResult['reset_token'],
             $request->password
         );
@@ -106,9 +124,7 @@ class PasswordResetController extends Controller
                 ->withInput();
         }
 
-        // Hapus session
-        session()->forget('email');
-
+        // Redirect ke halaman login dengan pesan sukses
         return redirect()->route('login')
             ->with('success', 'Password berhasil direset. Silakan login dengan password baru Anda.');
     }
@@ -121,14 +137,17 @@ class PasswordResetController extends Controller
      */
     public function resendOTP(Request $request)
     {
-        $email = session('email');
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
 
-        if (!$email) {
-            return redirect()->route('login')
-                ->with('error', 'Sesi telah berakhir. Silakan ulangi proses reset password.');
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        $result = $this->authService->resendOTP($email);
+        $result = $this->authService->resendOTP($request->email);
 
         if (!$result['success']) {
             return back()
