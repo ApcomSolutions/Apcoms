@@ -467,7 +467,7 @@
 
                 } catch (error) {
                     console.error('Error fetching team for editing:', error);
-                    alert('Failed to load team data for editing.');
+                    window.ErrorHandler.showError('Failed to load team data for editing.');
                     return;
                 }
             } else {
@@ -566,11 +566,11 @@
                 fetchTeams();
 
                 // Show success message
-                alert(result.message || 'Team member saved successfully');
+                window.ErrorHandler.showSuccess(result.message || 'Team member saved successfully');
 
             } catch (error) {
                 console.error('Error saving team member:', error);
-                alert(`Error: ${error.message || 'Failed to save team member'}`);
+                window.ErrorHandler.showError(`Error: ${error.message || 'Failed to save team member'}`);
             }
         }
 
@@ -597,11 +597,11 @@
                 fetchTeams();
 
                 // Show success message
-                alert(result.message || 'Team member deleted successfully');
+                window.ErrorHandler.showSuccess(result.message || 'Team member deleted successfully');
 
             } catch (error) {
                 console.error('Error deleting team member:', error);
-                alert(`Error: ${error.message || 'Failed to delete team member'}`);
+                window.ErrorHandler.showError(`Error: ${error.message || 'Failed to delete team member'}`);
             }
         }
 
@@ -947,11 +947,11 @@
 
                 // Refetch to get updated order
                 fetchTeams();
-                alert('Team order updated successfully');
+                window.ErrorHandler.showSuccess('Team order updated successfully');
 
             } catch (error) {
                 console.error('Error saving team order:', error);
-                alert(`Error: ${error.message || 'Failed to update team order'}`);
+                window.ErrorHandler.showError(`Error: ${error.message || 'Failed to update team order'}`);
                 saveButton.disabled = false;
             }
         }

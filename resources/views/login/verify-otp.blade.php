@@ -1,5 +1,3 @@
-{{-- resources/views/login/verify-otp.blade.php --}}
-
 <x-layout>
     <x-slot name="title">
         Verify OTP - APCOM Solutions
@@ -28,11 +26,12 @@
                 </p>
 
                 <!-- OTP Form -->
-                <form method="POST" action="{{ route('login.verify-otp') }}" class="w-full flex flex-col items-center">
+                <form method="POST" action="{{ route('login.verify-otp') }}" id="otpForm" class="w-full flex flex-col items-center">
                     @csrf
 
-                    <!-- Hidden Email Field -->
+                    <!-- Hidden Email and Token Fields -->
                     <input type="hidden" name="email" value="{{ $email ?? old('email') }}">
+                    <input type="hidden" name="token" value="{{ $token ?? '' }}">
 
                     <!-- OTP Field -->
                     <div class="w-full max-w-xs mb-6">
@@ -75,6 +74,8 @@
                             <span x-text="Math.floor(secondsLeft / 60)"></span>:<span
                                 x-text="(secondsLeft % 60).toString().padStart(2, '0')"></span> remaining
                         </div>
+
+                        <!-- Separate Resend Form -->
                         <form method="POST" action="{{ route('login.resend-otp') }}" class="inline">
                             @csrf
                             <input type="hidden" name="email" value="{{ $email ?? old('email') }}">
@@ -84,8 +85,8 @@
                         </form>
                     </div>
 
-                    <!-- Verify Button -->
-                    <button type="submit"
+                    <!-- Submit Button Using JavaScript -->
+                    <button type="button" onclick="document.getElementById('otpForm').submit();"
                             class="w-full max-w-xs py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-md hover:from-blue-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transform hover:-translate-y-0.5 transition-all duration-300">
                         Verify & Reset Password
                     </button>

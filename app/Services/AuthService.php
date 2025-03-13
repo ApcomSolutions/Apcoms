@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\ResetPasswordMail;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Mail\OtpMail;
 
 class AuthService
 {
@@ -60,7 +62,7 @@ class AuthService
     }
 
     /**
-     * Kirim OTP ke email untuk reset password
+     * Kirim link reset password dan OTP ke email
      *
      * @param string $email
      * @return array
@@ -89,23 +91,42 @@ class AuthService
             $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
             $expiresAt = Carbon::now()->addMinutes(10);
 
-            // Simpan OTP ke database
+            // Generate token untuk link reset password
+            $resetToken = Str::random(64);
+
+            // Simpan OTP dan token ke database
             DB::table('password_reset_tokens')
                 ->updateOrInsert(
                     ['email' => $email],
                     [
-                        'token' => Hash::make($otp),
+                        'token' => $resetToken, // Token untuk link
+                        'otp' => Hash::make($otp), // OTP untuk verifikasi
                         'created_at' => Carbon::now(),
                         'expires_at' => $expiresAt
                     ]
                 );
 
-            // Kirim email dengan OTP
-            $this->sendOTPEmail($email, $otp);
+            // Update user dengan OTP
+            $user->otp = $otp;
+            $user->otp_expires_at = $expiresAt;
+            $user->save();
+
+            // Buat URL reset
+            $resetUrl = url('/verify-otp?email=' . urlencode($email) . '&token=' . $resetToken);
+
+            // Kirim email dengan OTP dan link reset
+            Mail::send('emails.reset-password-otp', [
+                'otp' => $otp,
+                'resetUrl' => $resetUrl
+            ], function ($message) use ($email) {
+                $message->to($email)
+                    ->subject('Kode Verifikasi Reset Password');
+            });
 
             return [
                 'success' => true,
-                'message' => 'OTP berhasil dikirim'
+                'message' => 'Link reset password dan OTP berhasil dikirim',
+                'email' => $email
             ];
         } catch (\Exception $e) {
             return [
@@ -116,40 +137,44 @@ class AuthService
     }
 
     /**
-     * Verifikasi OTP yang dimasukkan user
+     * Verifikasi token dari link dan OTP yang dimasukkan user
      *
      * @param string $email
+     * @param string $token
      * @param string $otp
      * @return array
      */
     public function verifyOTP(string $email, string $otp): array
     {
-        $resetData = DB::table('password_reset_tokens')
-            ->where('email', $email)
-            ->first();
+        $user = User::where('email', $email)->first();
 
-        if (!$resetData) {
+        if (!$user || !$user->otp || Carbon::parse($user->otp_expires_at)->isPast()) {
             return [
                 'success' => false,
                 'message' => 'OTP tidak valid atau sudah kadaluarsa'
             ];
         }
 
-        if (Carbon::parse($resetData->expires_at)->isPast()) {
-            return [
-                'success' => false,
-                'message' => 'OTP sudah kadaluarsa'
-            ];
-        }
-
-        if (!Hash::check($otp, $resetData->token)) {
+        if ($user->otp !== $otp) {
             return [
                 'success' => false,
                 'message' => 'OTP tidak valid'
             ];
         }
 
-        // Generate reset token
+        // Ambil data reset token dari database
+        $resetData = DB::table('password_reset_tokens')
+            ->where('email', $email)
+            ->first();
+
+        if (!$resetData || Carbon::parse($resetData->expires_at)->isPast()) {
+            return [
+                'success' => false,
+                'message' => 'Token reset password tidak valid atau sudah kadaluarsa'
+            ];
+        }
+
+        // Generate reset token untuk reset password
         $resetToken = Str::random(60);
 
         // Update token
@@ -163,6 +188,33 @@ class AuthService
         return [
             'success' => true,
             'reset_token' => $resetToken
+        ];
+    }
+
+    /**
+     * Validasi token dari link reset password
+     *
+     * @param string $email
+     * @param string $token
+     * @return array
+     */
+    public function validateResetToken(string $email, string $token): array
+    {
+        $resetData = DB::table('password_reset_tokens')
+            ->where('email', $email)
+            ->where('token', $token)
+            ->first();
+
+        if (!$resetData || Carbon::parse($resetData->expires_at)->isPast()) {
+            return [
+                'success' => false,
+                'message' => 'Link reset password tidak valid atau sudah kadaluarsa'
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Token valid'
         ];
     }
 
@@ -204,6 +256,8 @@ class AuthService
         // Update password
         $user = User::where('email', $email)->first();
         $user->password = Hash::make($password);
+        $user->otp = null;
+        $user->otp_expires_at = null;
         $user->save();
 
         // Hapus token reset
@@ -225,37 +279,7 @@ class AuthService
      */
     public function resendOTP(string $email): array
     {
-        // Hapus OTP lama jika ada
-        DB::table('password_reset_tokens')
-            ->where('email', $email)
-            ->delete();
-
         // Kirim OTP baru
         return $this->sendOTP($email);
-    }
-
-    /**
-     * Kirim email OTP
-     *
-     * @param string $email
-     * @param string $otp
-     * @return void
-     */
-    private function sendOTPEmail(string $email, string $otp): void
-    {
-        // Implementasi menggunakan Laravel Mail
-        // Bisa dibuat view email yang lebih menarik
-        Mail::send('emails.reset-password-otp', ['otp' => $otp], function ($message) use ($email) {
-            $message->to($email)
-                ->subject('Kode Verifikasi Reset Password');
-        });
-
-        // Fallback jika view tidak ada
-        if (count(Mail::failures()) > 0) {
-            Mail::raw("Kode OTP untuk reset password Anda adalah: $otp. Kode ini berlaku selama 10 menit.", function ($message) use ($email) {
-                $message->to($email)
-                    ->subject('Reset Password OTP');
-            });
-        }
     }
 }

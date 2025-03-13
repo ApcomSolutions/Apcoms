@@ -104,10 +104,12 @@
 //
 
 
+
+
 // File: routes/web.php
 
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Web\Admin\AdminDashboardController;
 use App\Http\Controllers\Web\Admin\LoginController;
 use App\Http\Controllers\Web\InsightWebController;
@@ -153,16 +155,18 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->middleware('auth');
 
 // 🔑 Reset password routes
+Route::get('/forgot-password', function () {
+    return view('login.forgot-password');
+})->name('password.request')
+    ->middleware('guest');
+
 Route::post('/forgot-password', [PasswordResetController::class, 'sendOTP'])
     ->name('login.forgot-password')
     ->middleware('guest');
 
-Route::get('/verify-otp', function () {
-    if (!session('email')) {
-        return redirect()->route('login');
-    }
-    return view('login.verify-otp', ['email' => session('email')]);
-})->name('login.verify-otp.form')
+// Perbaikan: Menggunakan controller method untuk halaman verify OTP
+Route::get('/verify-otp', [PasswordResetController::class, 'showVerifyOtpForm'])
+    ->name('login.verify-otp.form')
     ->middleware('guest');
 
 Route::post('/verify-otp', [PasswordResetController::class, 'verifyOTP'])
@@ -172,6 +176,8 @@ Route::post('/verify-otp', [PasswordResetController::class, 'verifyOTP'])
 Route::post('/resend-otp', [PasswordResetController::class, 'resendOTP'])
     ->name('login.resend-otp')
     ->middleware('guest');
+
+
 
 // 📊 Routes untuk halaman admin (dashboard dan insights)
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {

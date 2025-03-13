@@ -11,6 +11,13 @@
                 <div class="flex items-center mt-2 md:mt-0 md:ml-4">
                     <span class="status-dot active-dot"></span>
                     <span class="text-sm">Live Data</span>
+
+                    <!-- Moved refresh button here -->
+                    <button id="refresh-btn" class="ml-4 bg-white/20 hover:bg-white/30 rounded-full p-2 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
                 </div>
             @endif
 
@@ -24,13 +31,7 @@
 
         <!-- Navigation Links -->
         <div id="nav-links" class="hidden md:flex flex-col md:flex-row w-full md:w-auto items-center space-y-4 md:space-y-0 md:space-x-4">
-            @if(isset($showRefreshButton) && $showRefreshButton)
-                <button id="refresh-btn" class="bg-white/20 hover:bg-white/30 rounded-full p-2 transition md:order-last">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-            @endif
+            <!-- Removed refresh button from here -->
 
             <a href="/" class="flex items-center text-white hover:text-gray-200 w-full md:w-auto py-2 md:py-0 px-4 md:px-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">

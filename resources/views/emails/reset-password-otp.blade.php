@@ -1,5 +1,4 @@
-{{-- resources/views/emails/reset-password-otp.blade.php --}}
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -49,6 +48,23 @@
             border: 1px dashed #3b82f6;
             display: inline-block;
         }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .link-container {
+            margin: 15px 0;
+            word-break: break-all;
+            background-color: #f0f5ff;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #3b82f6;
+        }
         .footer {
             padding-top: 20px;
             border-top: 1px solid #eaeaea;
@@ -72,15 +88,6 @@
         p {
             margin: 10px 0;
         }
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #3b82f6;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 15px;
-        }
     </style>
 </head>
 <body>
@@ -100,6 +107,17 @@
         </div>
 
         <p>Kode OTP ini akan kadaluarsa dalam 10 menit.</p>
+
+        <p>Klik tombol di bawah ini untuk melanjutkan proses reset password:</p>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <a href="{{ $resetUrl }}" class="button">Reset Password</a>
+        </div>
+
+        <p>Atau salin dan tempel URL berikut ke browser Anda:</p>
+        <div class="link-container">
+            {{ $resetUrl }}
+        </div>
 
         <div class="warning">
             Jika Anda tidak melakukan permintaan ini, abaikan email ini atau hubungi administrator.

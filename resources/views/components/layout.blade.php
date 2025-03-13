@@ -1,3 +1,4 @@
+{{--resources/views/components/layout.blade.php--}}
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-white">
 
@@ -16,7 +17,8 @@
         'resources/css/team.css',
         'resources/css/news-trix.css',
         'resources/css/admin/insight-crud.css',
-        'resources/js/app.js'
+        'resources/js/app.js',
+        'resources/js/CustomErrorHandler.js'
     ])
 
     <!-- Load route-specific JavaScript files -->
@@ -63,7 +65,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
-    <title>{{ $title ?? 'APCOM Solutions' }}</title>
+    <title>{{ $title ?? 'ApCom Solutions - Membangun Reputasi Menciptakan Solusi' }}</title>
 
     <style>
         html {

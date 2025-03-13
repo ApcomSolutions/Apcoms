@@ -1033,140 +1033,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    // /**
-    //  * Save News (Create or Update) using API
-    //  */
-    // async function saveNews() {
-    //     const form = document.getElementById('news-form');
-    //     const formMethodElement = document.getElementById('form-method');
-    //     if (!form || !formMethodElement) return;
-    //
-    //     const formData = new FormData(form);
-    //     const method = formMethodElement.value;
-    //
-    //     // Get content from Trix Editor
-    //     const trixEditor = document.querySelector('trix-editor');
-    //     const contentInput = document.getElementById('content-input');
-    //     if (trixEditor && contentInput) {
-    //         // Make sure we have the latest content
-    //         formData.set('content', trixEditor.editor.getDocument().toString());
-    //     }
-    //
-    //     // IMPORTANT: Explicitly get the status value and add it to the form data
-    //     const statusSelect = document.getElementById('status');
-    //     if (statusSelect) {
-    //         const statusValue = statusSelect.value || 'published';
-    //         console.log('Status selected:', statusValue); // Debug log
-    //         formData.set('status', statusValue);
-    //     } else {
-    //         // If for some reason the select element is missing, default to published
-    //         formData.set('status', 'published');
-    //     }
-    //
-    //     // Add CSRF token explicitly to the FormData
-    //     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    //     formData.append('_token', csrfToken);
-    //
-    //     // Make sure delete_image is included
-    //     const deleteImageInput = document.getElementById('delete_image');
-    //     if (deleteImageInput) {
-    //         console.log('Delete image flag:', deleteImageInput.value);
-    //     }
-    //
-    //     // Log all form data for debugging
-    //     console.log('Form data entries:');
-    //     for (let pair of formData.entries()) {
-    //         console.log(pair[0] + ': ' + pair[1]);
-    //     }
-    //
-    //     try {
-    //         let url = '/api/news';
-    //         let requestMethod = 'POST';
-    //
-    //         if (method === 'PUT' && currentNewsSlug) {
-    //             url = `/api/news/${currentNewsSlug}`;
-    //             requestMethod = 'POST'; // Change to POST for file uploads with PUT intention
-    //             formData.append('_method', 'PUT'); // Laravel will interpret this as PUT
-    //         }
-    //
-    //         // Disable save button and show loading state
-    //         const saveButton = document.getElementById('save-news-btn');
-    //         if (saveButton) {
-    //             saveButton.disabled = true;
-    //             saveButton.innerHTML = `
-    //             <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-    //                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-    //                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    //             </svg>
-    //             Saving...
-    //         `;
-    //         }
-    //
-    //         const response = await fetch(url, {
-    //             method: requestMethod,
-    //             headers: {
-    //                 'X-CSRF-TOKEN': csrfToken,
-    //                 // Do NOT include Content-Type header when using FormData
-    //             },
-    //             body: formData
-    //         });
-    //
-    //         // Re-enable save button
-    //         if (saveButton) {
-    //             saveButton.disabled = false;
-    //             saveButton.innerHTML = 'Save';
-    //         }
-    //
-    //         // Check if response is JSON
-    //         const contentType = response.headers.get("content-type");
-    //         let result;
-    //
-    //         if (contentType && contentType.includes("application/json")) {
-    //             result = await response.json();
-    //         } else {
-    //             // Handle non-JSON response (likely an error)
-    //             const text = await response.text();
-    //             console.error("Server returned non-JSON response:", text.slice(0, 500));
-    //             throw new Error(`Server error: ${response.status} ${response.statusText}`);
-    //         }
-    //
-    //         if (!response.ok) {
-    //             if (result.errors) {
-    //                 // Format validation errors for better display
-    //                 const errorMessages = Object.entries(result.errors)
-    //                     .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
-    //                     .join('\n');
-    //                 throw new Error(`Validation errors:\n${errorMessages}`);
-    //             }
-    //             throw new Error(result.message || `Error ${response.status}: Failed to save news article`);
-    //         }
-    //
-    //         // Close modal and refresh list
-    //         const editorModal = document.getElementById('news-editor-modal');
-    //         if (editorModal) closeModal(editorModal);
-    //
-    //         // Force fetch news data again to refresh UI with fresh data
-    //         await fetchNews();
-    //
-    //         // Show success message
-    //         alert(result.message || 'News article saved successfully');
-    //
-    //     } catch (error) {
-    //         console.error('Error saving news:', error);
-    //         alert(`Error: ${error.message || 'Failed to save news article'}`);
-    //
-    //         // Re-enable save button if still disabled
-    //         const saveButton = document.getElementById('save-news-btn');
-    //         if (saveButton && saveButton.disabled) {
-    //             saveButton.disabled = false;
-    //             saveButton.innerHTML = 'Save';
-    //         }
-    //     }
-    // }
-
-    /**
-     * Save news article with properly cleaned content
-     */
     async function saveNews() {
         const form = document.getElementById('news-form');
         const formMethodElement = document.getElementById('form-method');
@@ -1282,11 +1148,11 @@ document.addEventListener('DOMContentLoaded', function() {
             await fetchNews();
 
             // Show success message
-            alert(result.message || 'News article saved successfully');
+            window.ErrorHandler.showSuccess(result.message || 'News article saved successfully');
 
         } catch (error) {
             console.error('Error saving news:', error);
-            alert(`Error: ${error.message || 'Failed to save news article'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to save news article'}`);
 
             // Re-enable save button if still disabled
             const saveButton = document.getElementById('save-news-btn');
@@ -1345,11 +1211,11 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchNews();
 
             // Show success message
-            alert(result.message || 'News article deleted successfully');
+            window.ErrorHandler.showSuccess(result.message || 'News article deleted successfully');
 
         } catch (error) {
             console.error('Error deleting news:', error);
-            alert(`Error: ${error.message || 'Failed to delete news article'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to delete news article'}`);
 
             // Re-enable delete button if still disabled
             const deleteButton = document.getElementById('confirm-delete-btn');
