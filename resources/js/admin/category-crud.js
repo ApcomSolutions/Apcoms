@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             } catch (error) {
                 console.error('Error fetching category for editing:', error);
-                alert('Failed to load category data for editing.');
+                window.ErrorHandler.showError('Failed to load category data for editing.');
                 return;
             }
         } else {
@@ -526,11 +526,11 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchCategories();
 
             // Show success message
-            alert(result.message || 'Category saved successfully');
+            window.ErrorHandler.showSuccess(result.message || 'Category saved successfully');
 
         } catch (error) {
             console.error('Error saving category:', error);
-            alert(`Error: ${error.message || 'Failed to save category'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to save category'}`);
         }
     }
 
@@ -569,11 +569,11 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchCategories();
 
             // Show success message
-            alert('Category deleted successfully');
+            window.ErrorHandler.showSuccess('Category deleted successfully');
 
         } catch (error) {
             console.error('Error deleting category:', error);
-            alert(`Error: ${error.message || 'Failed to delete category'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to delete category'}`);
         }
     }
 

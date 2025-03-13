@@ -545,24 +545,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Fetch insight stats from API
-    // async function fetchInsightStats(insightId) {
-    //     try {
-    //         const response = await fetch(`/api/admin/dashboard/insight-stats/${insightId}`);
-    //         if (!response.ok) {
-    //             if (response.status === 404) {
-    //                 // No stats available yet, return defaults
-    //                 return { total_views: 0, avg_read_time: 0 };
-    //             }
-    //             throw new Error('Failed to fetch stats');
-    //         }
-    //         return await response.json();
-    //     } catch (error) {
-    //         console.error(`Error fetching stats for insight ${insightId}:`, error);
-    //         return { total_views: 0, avg_read_time: 0 };
-    //     }
-    // }
-
     // Tambahkan di awal file insight-crud.js
     async function fetchInsightStats(insightId) {
         try {
@@ -1142,7 +1124,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             } catch (error) {
                 console.error('Error fetching insight for editing:', error);
-                alert('Failed to load insight data for editing.');
+                if (window.AppError) {
+                    AppError.showError('Failed to load insight data for editing.');
+                } else {
+                    alert('Failed to load insight data for editing.');
+                }
                 return;
             }
         } else {
@@ -1306,12 +1292,32 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             fetchArticles();
 
-            // Show success message
-            alert((result && result.message) || 'Insight saved successfully');
+            // Show success message using CustomErrorHandler
+            if (window.ErrorHandler) {
+                // Use custom error handler if available
+                window.ErrorHandler.showSuccess((result && result.message) || 'Insight saved successfully');
+            } else if (window.AppError) {
+                // Use AppError wrapper if available
+                window.AppError.showSuccess((result && result.message) || 'Insight saved successfully');
+            } else {
+                // Fallback to regular alert
+                alert((result && result.message) || 'Insight saved successfully');
+            }
 
         } catch (error) {
             console.error('Error saving insight:', error);
-            alert(`Error: ${error.message || 'Failed to save insight'}`);
+
+            // Handle the error using CustomErrorHandler
+            if (window.ErrorHandler) {
+                // Use custom error handler if available
+                window.ErrorHandler.showError(`Error: ${error.message || 'Failed to save insight'}`);
+            } else if (window.AppError) {
+                // Use AppError wrapper if available
+                window.AppError.showError(`Error: ${error.message || 'Failed to save insight'}`);
+            } else {
+                // Fallback to regular alert
+                alert(`Error: ${error.message || 'Failed to save insight'}`);
+            }
         }
     }
 
@@ -1358,11 +1364,11 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchArticles();
 
             // Show success message
-            alert(result.message || 'Insight deleted successfully');
+            window.ErrorHandler.showSuccess(result.message || 'Insight deleted successfully');
 
         } catch (error) {
             console.error('Error deleting insight:', error);
-            alert(`Error: ${error.message || 'Failed to delete insight'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to delete insight'}`);
         }
     }
 
