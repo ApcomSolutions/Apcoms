@@ -355,11 +355,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Refetch to get updated order
             fetchClients();
-            alert('Client order updated successfully');
+            window.ErrorHandler.showSuccess('Client order updated successfully');
 
+            // Client order error
         } catch (error) {
             console.error('Error saving client order:', error);
-            alert(`Error: ${error.message || 'Failed to update client order'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to update client order'}`);
             saveButton.disabled = false;
         }
     }
@@ -508,11 +509,11 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchClients();
 
             // Show success message
-            alert(result.message || 'Client saved successfully');
+            window.ErrorHandler.showSuccess(result.message || 'Client saved successfully');
 
         } catch (error) {
             console.error('Error saving client:', error);
-            alert(`Error: ${error.message || 'Failed to save client'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to save client'}`);
         }
     }
 
@@ -538,12 +539,14 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal(deleteModal);
             fetchClients();
 
-            // Show success message
-            alert(result.message || 'Client deleted successfully');
 
+            // Show success message
+            window.ErrorHandler.showSuccess(result.message || 'Client deleted successfully');
+
+// Error deleting client
         } catch (error) {
             console.error('Error deleting client:', error);
-            alert(`Error: ${error.message || 'Failed to delete client'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to delete client'}`);
         }
     }
 

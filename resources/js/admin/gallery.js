@@ -792,7 +792,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Error opening preview:', error);
-            alert('Failed to load image preview.');
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to load image preview'}`);
         }
     }
 
@@ -823,11 +823,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Refetch to get updated order
             fetchGallery();
-            alert('Gallery order updated successfully');
-
+            window.ErrorHandler.showSuccess('Gallery order updated successfully');
         } catch (error) {
             console.error('Error saving gallery order:', error);
-            alert(`Error: ${error.message || 'Failed to update gallery order'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to update gallery order'}`);
             saveButton.disabled = false;
         }
     }
@@ -1008,7 +1007,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             } catch (error) {
                 console.error('Error fetching image for editing:', error);
-                alert('Failed to load image data for editing.');
+                window.ErrorHandler.showError(`Error: ${error.message || 'Failed to load image data for editing'}`);
                 return;
             }
         } else {
@@ -1101,11 +1100,10 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchGallery();
 
             // Show success message
-            alert(result.message || 'Gallery image saved successfully');
-
+            window.ErrorHandler.showSuccess(result.message || 'Gallery image saved successfully');
         } catch (error) {
             console.error('Error saving gallery image:', error);
-            alert(`Error: ${error.message || 'Failed to save gallery image'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to save gallery image'}`);
         }
     }
 
@@ -1132,11 +1130,10 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchGallery();
 
             // Show success message
-            alert(result.message || 'Gallery image deleted successfully');
-
+            window.ErrorHandler.showSuccess(result.message || 'Gallery image deleted successfully');
         } catch (error) {
             console.error('Error deleting gallery image:', error);
-            alert(`Error: ${error.message || 'Failed to delete gallery image'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to delete gallery image'}`);
         }
     }
 

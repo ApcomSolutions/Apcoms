@@ -401,14 +401,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Show success message
-            alert(result.message || 'Category order saved successfully');
+            window.ErrorHandler.showSuccess(result.message || 'Category order saved successfully');
 
             // Refresh categories to get latest order
             await fetchNewsCategories();
 
         } catch (error) {
             console.error('Error saving category order:', error);
-            alert(`Error: ${error.message || 'Failed to save category order'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to save category order'}`);
 
             // Reset save button
             const saveButton = document.getElementById('save-order-btn');
@@ -691,11 +691,11 @@ document.addEventListener('DOMContentLoaded', function() {
             await fetchNewsCategories();
 
             // Show success message
-            alert(result.message || 'Category saved successfully');
+            window.ErrorHandler.showSuccess(result.message || 'Category saved successfully');
 
         } catch (error) {
             console.error('Error saving category:', error);
-            alert(`Error: ${error.message || 'Failed to save category'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to save category'}`);
 
             // Re-enable save button if still disabled
             const saveButton = document.getElementById('save-category-btn');
@@ -790,11 +790,11 @@ document.addEventListener('DOMContentLoaded', function() {
             await fetchNewsCategories();
 
             // Show success message
-            alert(result.message || 'Category deleted successfully');
+            window.ErrorHandler.showSuccess(result.message || 'Category deleted successfully');
 
         } catch (error) {
             console.error('Error deleting category:', error);
-            alert(`Error: ${error.message || 'Failed to delete category'}`);
+            window.ErrorHandler.showError(`Error: ${error.message || 'Failed to delete category'}`);
 
             // Re-enable delete button if still disabled
             const deleteButton = document.getElementById('confirm-delete-btn');
