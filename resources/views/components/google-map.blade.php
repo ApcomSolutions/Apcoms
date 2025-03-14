@@ -35,7 +35,7 @@
                 window.GoogleMapsManager = {
                     apiLoaded: false,
                     apiLoading: false,
-                    apiKey: '{{ config('google-maps.api_key', 'AIzaSyAwu4CGUgxRjUN4pahOIpTsKmKw35gWgN8') }}',
+                    apiKey: '{{ config('google-maps.api_key', 'Api Key') }}',
                     mapInstances: {},
                     mapConfigs: {},
 

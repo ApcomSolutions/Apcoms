@@ -90,7 +90,7 @@
                     </div>
                 </div>
 
-                <a href="contact"
+                <a href="/contact"
                     class="border-transparent text-gray-700 hover:border-pink-400 hover:text-pink-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                     Contact Us
                 </a>
