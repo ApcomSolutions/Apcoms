@@ -14,7 +14,21 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    /*
+    |--------------------------------------------------------------------------
+    | API Keys
+    |--------------------------------------------------------------------------
+    |
+    | Kunci API untuk mengakses API dari berbagai client.
+    | Kunci ini digunakan untuk memvalidasi permintaan dari client yang sah.
+    |
+    */
 
+    'api_keys' => [
+        env('API_KEY_WEB_APP', 'a1b2c3d4e5f6g7h8i9j0') => 'web_app',
+        env('API_KEY_MOBILE_APP', 'j9i8h7g6f5e4d3c2b1a0') => 'mobile_app',
+        env('API_KEY_PARTNER', 'z9y8x7w6v5u4t3s2r1q0') => 'partner_api',
+    ],
     /*
     |--------------------------------------------------------------------------
     | Application Environment

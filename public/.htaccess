@@ -18,8 +18,84 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Block access to sensitive files and directories
+    RewriteRule ^.env - [F,L]
+    RewriteRule ^composer.json - [F,L]
+    RewriteRule ^composer.lock - [F,L]
+    RewriteRule ^storage/(.*)$ - [F,L]
+    RewriteRule ^config/(.*)$ - [F,L]
+    RewriteRule ^app/(.*).php$ - [F,L]
+    RewriteRule ^resources/views/(.*).blade.php$ - [F,L]
+
+    # Block PHP execution in uploads directory
+    RewriteCond %{REQUEST_URI} ^/uploads/.*\.php$ [OR]
+    RewriteCond %{REQUEST_URI} ^/public/uploads/.*\.php$
+    RewriteRule .* - [F,L]
+
+    # Block access to files starting with dot
+    RewriteRule (^\.|/\.) - [F]
+
+    # Block access to specific file types in writable directories
+    <FilesMatch "\.(php|phtml|php\.|php3|php4|php5|php7|phar|inc|pht|phps)$">
+        Order Deny,Allow
+        Deny from all
+    </FilesMatch>
+
+    # Allow PHP files in specific directories only
+    <FilesMatch "\.(php)$">
+        Order Deny,Allow
+        Deny from all
+    </FilesMatch>
+
+    <FilesMatch "^(index|app|artisan|server).php$">
+        Order Allow,Deny
+        Allow from all
+    </FilesMatch>
+
+    # Block requests with suspicious query strings
+    RewriteCond %{QUERY_STRING} \.\.\/ [OR]
+    RewriteCond %{QUERY_STRING} boot\.ini [OR]
+    RewriteCond %{QUERY_STRING} tag\= [OR]
+    RewriteCond %{QUERY_STRING} ftp\: [OR]
+    RewriteCond %{QUERY_STRING} http\: [OR]
+    RewriteCond %{QUERY_STRING} https\: [OR]
+    RewriteCond %{QUERY_STRING} mosConfig [OR]
+    RewriteCond %{QUERY_STRING} ^.*(\[|\]|\(|\)|\{|\}|\<|\>|'|"|;|\*).* [OR]
+    RewriteCond %{QUERY_STRING} ^.*(%22|%27|%3C|%3E|%5C|%7B|%7C).* [OR]
+    RewriteCond %{QUERY_STRING} ^.*(%0|%A|%B|%C|%D|%E|%F|127\.0).* [OR]
+    RewriteCond %{QUERY_STRING} ^.*(globals|encode|config|localhost|loopback).* [OR]
+    RewriteCond %{QUERY_STRING} ^.*(request|select|insert|union|declare|drop|passwd).*
+    RewriteRule .* - [F]
+
+    # Set correct MIME type for favicon
+    AddType image/x-icon .ico
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# Protect .htaccess file
+<Files .htaccess>
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Protect against XSS attacks
+<IfModule mod_headers.c>
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com https://kit.fontawesome.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: https:; connect-src 'self'"
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

@@ -1,18 +1,17 @@
 <?php
 
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use RalphJSmit\Laravel\SEO\Support\HasSEO;
 
 class NewsCategory extends Model
 {
-    use HasFactory;
+    use HasFactory, HasSEO;
 
     protected $table = 'news_categories';
-
     protected $fillable = ['name', 'slug', 'description'];
 
     public static function boot()
