@@ -1,5 +1,5 @@
 {{--resources/views/components/layout.blade.php--}}
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en" class="h-full bg-white">
 
 <head>
@@ -7,8 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <!-- SEO Tags -->
+     {!! seo()->for($seoData ?? null) !!}
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
     <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
     <link href="https://unpkg.com/trix@2.0.0/dist/trix.css" rel="stylesheet">
 
@@ -62,7 +68,7 @@
     <script src="https://kit.fontawesome.com/e20865611c.js" crossorigin="anonymous"></script>
 
     <!-- Load AOS Library  -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
     <title>{{ $title ?? 'ApCom Solutions - Membangun Reputasi Menciptakan Solusi' }}</title>
