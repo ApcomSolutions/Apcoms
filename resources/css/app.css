@@ -12,15 +12,13 @@
 }
 
 @media screen and (min-width: 1024px){
-    .zoom-responsive{
-        transform: scale(0.8);
-        transform-origin: center center;
+    .zoom responsive{
+        zoom : 0.8;
     }
 }
 
 @media screen and (min-width: 1280px){
-    .zoom-responsive{
-        transform: scale(1);
-        transform-origin: center center;
+    .zoom responsive{
+        zoom : 1;
     }
 }

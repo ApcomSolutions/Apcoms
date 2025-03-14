@@ -1,10 +1,9 @@
 <x-layout>
     <x-navbar></x-navbar>
     {{-- Hero Section --}}
-    <div
-        class="relative min-h-[80vh] flex items-center mt-10 py-70 justify-center px-6 md:px-12 overflow-hidden zoom-resposive">
+    <div class="relative min-h-[80vh] flex items-center mt-10 py-40 justify-center py-20 px-6 md:px-12 overflow-hidden">
         <!-- Pola latar belakang dengan gradient dan shapes -->
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-pink-50 zoom-resposive">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-pink-50">
             <!-- Decorative shapes -->
             <div class="absolute top-5 left-10 w-64 h-64 rounded-full bg-pink-300 opacity-70 mix-blend-multiply parallax"
                 data-speed="3"></div>
@@ -20,21 +19,22 @@
         </div>
 
         <!-- Container -->
-        <div class="container flex flex-col md:flex-row items-center relative z-10 zoom-resposive">
-            <!-- Latar belakang teks -->
-            <div class="md:w-[55%] w-full mb-8 md:mb-0 bg-white bg-opacity-80 p-8 rounded-lg shadow-lg">
+        <div class="container mx-auto flex flex-col md:flex-row items-center relative z-10">
+            <!-- Text Content -->
+            <div
+                class="md:w-[60%] w-full mb-8 md:mb-0 p-6 md:p-8 bg-white bg-opacity-80 rounded-lg shadow-lg backdrop-blur-sm border border-gray-100">
                 <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 pb-2 gradient-text">
                     Mitra Strategis Reputasi Digital Anda
                 </h1>
-                <h2 class="text-lg sm:text-xl md:text-2xl mb-6 font-medium text-gray-700">
+                <p class="text-lg sm:text-xl md:text-2xl mb-6 font-medium text-gray-700">
                     Membangun dan Mempertahankan Reputasi Terbaik di Era Digital
-                </h2>
-                <p class="text-gray-600 text-md md:text-lg mb-8">
+                </p>
+                <p class="text-sm sm:text-base md:text-lg mb-8 leading-relaxed text-gray-600">
                     Kami menggabungkan kreativitas, inovasi, dan pendekatan berkelanjutan untuk mendukung kebutuhan
                     komunikasi bisnis Anda. Dengan layanan unggulan mulai dari pendampingan humas kreatif hingga
                     publikasi ilmiah, kami siap membawa reputasi Anda ke tingkat yang lebih tinggi.
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 mt-6">
+                <div class="flex flex-col sm:flex-row gap-4">
                     <a href="https://wa.me/628125881289"
                         class="bg-pink-500 hover:bg-pink-600 text-white font-medium py-3 px-8 rounded-full shadow-md transition duration-300 text-center">
                         Konsultasi Sekarang
@@ -48,13 +48,11 @@
                     </a>
                 </div>
             </div>
-            <div class="md:w-[45%] hidden md:block">
-                <!-- Area ini bisa digunakan untuk gambar atau ilustrasi jika diperlukan -->
-            </div>
         </div>
     </div>
+
     {{-- About Us Section --}}
-    <div class="py-30 px-4 relative overflow-hidden zoom-resposive">
+    <div class="py-30 px-4 relative overflow-hidden">
         <!-- Blue-500 background with fade effects -->
         <div class="absolute inset-0 bg-blue-100">
             <!-- TAMBAHAN: Bubble pudar putih bergerak horizontal -->
@@ -67,7 +65,7 @@
             </div>
 
             <!-- Animated wave effect at bottom -->
-            <div class="absolute bottom-0 left-0 w-full overflow-hidden zoom-resposive">
+            <div class="absolute bottom-0 left-0 w-full overflow-hidden">
                 <svg class="absolute bottom-0 w-full h-24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
                     <path fill="#ffffff" fill-opacity="1"
                         d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,213.3C672,224,768,224,864,208C960,192,1056,160,1152,160C1248,160,1344,192,1392,208L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
@@ -427,100 +425,6 @@
         <x-gallery-carousel></x-gallery-carousel>
     </div>
 
-    {{-- Get In Touch Section --}}
-    <div class="bg-white py-12">
-        <div class="container mx-auto px-4">
-            <h1 class="text-3xl font-bold text-center mb-8">Get In Touch</h1>
-
-            <div class="max-w-6xl mx-auto">
-                <p class="text-gray-700 text-center mb-10">
-                    Siap untuk membawa bisnis Anda ke level berikutnya? Kami siap membantu. <br>
-                    Baik Anda memiliki pertanyaan tentang layanan kami? <br>
-                    ingin mendiskusikan proyek potensial, atau sekadar ingin berbincang <br>
-                    tentang strategi digital Anda, kami sangat senang mendengar dari Anda.
-                </p>
-
-                <div class="flex flex-col md:flex-row gap-8 items-center">
-                    <!-- Customer Service Image Section -->
-                    <div class="w-full md:w-2/5 flex flex-col items-center">
-                        <img src="{{ asset('images/customer.png') }}" alt="Customer Service"
-                            class="rounded-lg mb-8 w-full max-w-sm object-cover">
-
-                        <!-- Contact Information with Icons -->
-                        <div class="w-full max-w-sm">
-
-                            <div class="flex items-center mb-4">
-                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-pink-100 mr-4">
-                                    <i class="fas fa-phone-alt text-pink-500"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-medium">Phone</h3>
-                                    <p class="text-gray-600">+62 812-5881-289</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center">
-                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-pink-100 mr-4">
-                                    <i class="fas fa-envelope text-pink-500"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-medium">Email</h3>
-                                    <p class="text-gray-600">adminapcoms@apcoms.co.id</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Form Section -->
-                    <div class="w-full md:w-3/5 bg-gray-50 p-6 rounded-lg shadow-md">
-                        <h2 class="text-2xl font-semibold mb-6 flex items-center">
-                            <i class="fas fa-paper-plane text-pink-500 mr-3"></i>
-                            Send Us a Message
-                        </h2>
-
-                        <form>
-                            <div class="flex flex-col md:flex-row gap-4 mb-4">
-                                <div class="w-full md:w-1/2">
-                                    <label for="name" class="block text-gray-700 font-medium mb-2">
-                                        <i class="fas fa-user text-pink-500 mr-2"></i>
-                                        Name
-                                    </label>
-                                    <input type="text" id="name" name="name"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500">
-                                </div>
-
-                                <div class="w-full md:w-1/2">
-                                    <label for="email" class="block text-gray-700 font-medium mb-2">
-                                        <i class="fas fa-envelope text-pink-500 mr-2"></i>
-                                        Email Address
-                                    </label>
-                                    <input type="email" id="email" name="email"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500">
-                                </div>
-                            </div>
-
-                            <div class="mb-6">
-                                <label for="message" class="block text-gray-700 font-medium mb-2">
-                                    <i class="fas fa-comment-alt text-pink-500 mr-2"></i>
-                                    Your Message
-                                </label>
-                                <textarea id="message" name="message" rows="6"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"></textarea>
-                            </div>
-
-                            <div class="text-center">
-                                <button type="submit"
-                                    class="bg-pink-500 text-white py-3 px-8 rounded-md hover:bg-pink-600 transition flex items-center mx-auto">
-                                    <i class="fas fa-paper-plane mr-2"></i>
-                                    Send Message
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
     <x-footer></x-footer>
@@ -724,4 +628,5 @@
             easing: 'ease-in-out-sine', // Default easing untuk animasi AOS
         });
     });
+
 </script>
