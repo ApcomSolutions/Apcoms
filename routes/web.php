@@ -123,6 +123,19 @@ use App\Http\Controllers\Web\Admin\GalleryAdminController;
 use App\Http\Controllers\Web\NewsWebController;
 use Illuminate\Support\Facades\Route;
 
+
+Route::get('/robots.txt', function () {
+    $content = "";
+
+    if (app()->environment('production')) {
+        $content = "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /login\nDisallow: /forgot-password\nDisallow: /verify-otp\n\nSitemap: " . url('/sitemap.xml');
+    } else {
+        $content = "User-agent: *\nDisallow: /";
+    }
+
+    return response($content, 200)
+        ->header('Content-Type', 'text/plain');
+});
 // 🏠 Home route
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -207,11 +220,23 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
 // Rute halaman statis
 Route::get('/about', function () {
-    return view('about');
+    $seoData = new \RalphJSmit\Laravel\SEO\Support\SEOData(
+        title: 'Tentang Kami',
+        description: 'Kenali lebih dekat ApCom Solutions dan layanan kami dalam membangun reputasi bisnis Anda.',
+        url: url('/about')
+    );
+
+    return view('about', ['seoData' => $seoData]);
 });
 
 Route::get('/contact', function () {
-    return view('contact');
+    $seoData = new \RalphJSmit\Laravel\SEO\Support\SEOData(
+        title: 'Hubungi Kami',
+        description: 'Hubungi tim ApCom Solutions untuk konsultasi komunikasi dan PR untuk bisnis Anda.',
+        url: url('/contact')
+    );
+
+    return view('contact', ['seoData' => $seoData]);
 });
 
 Route::get('/penerbitskt', function () {

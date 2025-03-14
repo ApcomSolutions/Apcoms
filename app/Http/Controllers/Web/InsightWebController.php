@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use App\Services\TrackingService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use RalphJSmit\Laravel\SEO\Support\SEOData;
+use Illuminate\Support\Str;
 
 class InsightWebController extends Controller
 {
@@ -27,6 +29,13 @@ class InsightWebController extends Controller
      */
     public function index(Request $request)
     {
+        // SEO for insights listing page
+        $seoData = new SEOData(
+            title: 'Insights',
+            description: 'Kumpulan artikel insights terbaru tentang komunikasi, PR, dan strategi branding dari ApCom Solutions.',
+            url: route('insights.index')
+        );
+
         $insights = $this->insightService->getAllInsights();
         $categories = Category::withCount('insights')->get();
 
@@ -41,9 +50,26 @@ class InsightWebController extends Controller
 
         return view('insights.index', [
             'insights' => $paginatedInsights,
-            'categories' => $categories
+            'categories' => $categories,
+            'seoData' => $seoData
         ]);
     }
+
+    /**
+     * Display the specified resource.
+     */
+//    public function show(string $slug, Request $request)
+//    {
+//        // Get raw insight model instead of array
+//        $insight = Insight::with('category')->where('slug', $slug)->firstOrFail();
+//        $categories = Category::withCount('insights')->get();
+//
+//        // Create a tracking record and pass it to the view
+//        $trackingService = app(TrackingService::class);
+//        $tracking = $trackingService->trackView($insight->id, $request);
+//
+//        return view('insights.detail', compact('insight', 'categories', 'tracking'));
+//    }
 
     /**
      * Display the specified resource.
@@ -54,11 +80,55 @@ class InsightWebController extends Controller
         $insight = Insight::with('category')->where('slug', $slug)->firstOrFail();
         $categories = Category::withCount('insights')->get();
 
+        // Set SEO for this insight
+        $seoData = new SEOData(
+            title: $insight->judul,
+            description: Str::limit(strip_tags($insight->isi), 160),
+            image: $insight->image_url,
+            url: route('insights.show', $insight->slug)
+        );
+
+        // Create breadcrumbs for structured data
+        if ($insight->category) {
+            $seoData->jsonLd = [
+                '@type' => 'Article',
+                'breadcrumb' => [
+                    '@type' => 'BreadcrumbList',
+                    'itemListElement' => [
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 1,
+                            'name' => 'Home',
+                            'item' => route('home')
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 2,
+                            'name' => 'Insights',
+                            'item' => route('insights.index')
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 3,
+                            'name' => $insight->category->name,
+                            'item' => route('insights.category', $insight->category->slug)
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 4,
+                            'name' => $insight->judul,
+                            'item' => route('insights.show', $insight->slug)
+                        ]
+                    ]
+                ]
+            ];
+        }
+
         // Create a tracking record and pass it to the view
         $trackingService = app(TrackingService::class);
         $tracking = $trackingService->trackView($insight->id, $request);
 
-        return view('insights.detail', compact('insight', 'categories', 'tracking'));
+        return view('insights.detail', compact('insight', 'categories', 'tracking', 'seoData'));
     }
 
     /**
@@ -70,6 +140,11 @@ class InsightWebController extends Controller
         Log::info('Search request received', ['query' => $request->input('query')]);
 
         $query = $request->input('query');
+        $seoData = new SEOData(
+            title: "Hasil Pencarian: $query",
+            description: "Hasil pencarian untuk \"$query\" di ApCom Solutions Insights.",
+            robots: 'noindex,follow' // Prevent search pages from being indexed
+        );
         $insights = $this->insightService->searchInsights($query);
         $categories = Category::withCount('insights')->get();
 
@@ -83,7 +158,8 @@ class InsightWebController extends Controller
         return view('insights.index', [
             'insights' => $paginatedInsights,
             'categories' => $categories,
-            'searchQuery' => $query
+            'searchQuery' => $query,
+            'seoData' => $seoData
         ]);
     }
 
@@ -135,6 +211,12 @@ class InsightWebController extends Controller
     public function category($slug, Request $request)
     {
         $category = Category::where('slug', $slug)->firstOrFail();
+        // SEO for category pages
+        $seoData = new SEOData(
+            title: "Kategori: {$category->name}",
+            description: "Artikel insights tentang {$category->name} dari ApCom Solutions.",
+            url: route('insights.category', $slug)
+        );
 
         // For better performance, we could modify this to use the service
         // But keeping it similar to your original implementation
@@ -171,7 +253,8 @@ class InsightWebController extends Controller
             'insights' => $paginatedInsights,
             'categories' => $categories,
             'currentCategory' => $category->name,
-            'category' => $category // Pass the full category model for additional info
+            'category' => $category, // Pass the full category model for additional info
+             'seoData' => $seoData
         ]);
     }
     /**

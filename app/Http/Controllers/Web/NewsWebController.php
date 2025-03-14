@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use App\Services\NewsTrackingService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+use RalphJSmit\Laravel\SEO\Support\SEOData;
 
 class NewsWebController extends Controller
 {
@@ -27,6 +29,13 @@ class NewsWebController extends Controller
      */
     public function index(Request $request)
     {
+        // SEO for news listing page
+        $seoData = new SEOData(
+            title: 'Berita',
+            description: 'Berita terbaru dari ApCom Solutions tentang komunikasi, PR, dan industri terkait.',
+            url: route('news.index')
+        );
+
         // Get all news from service - will respect global scope and only show published
         $news = $this->newsService->getAllNews();
 
@@ -43,7 +52,8 @@ class NewsWebController extends Controller
 
         return view('news.index', [
             'news' => $paginatedNews,
-            'categories' => $categories
+            'categories' => $categories,
+            'seoData' => $seoData
         ]);
     }
 
@@ -59,6 +69,71 @@ class NewsWebController extends Controller
 
         $categories = NewsCategory::withCount('news')->get();
 
+        // SEO for news detail page
+        $seoData = new SEOData(
+            title: $news->title,
+            description: Str::limit(strip_tags($news->content), 160),
+            image: $news->image_url,
+            url: route('news.show', $news->slug)
+        );
+
+        // Create breadcrumbs for structured data
+        if ($news->category) {
+            $seoData->jsonLd = [
+                '@type' => 'NewsArticle',
+                'headline' => $news->title,
+                'image' => $news->image_url,
+                'datePublished' => $news->publish_date->toIso8601String(),
+                'dateModified' => $news->updated_at->toIso8601String(),
+                'author' => [
+                    '@type' => 'Person',
+                    'name' => $news->author
+                ],
+                'publisher' => [
+                    '@type' => 'Organization',
+                    'name' => 'ApCom Solutions',
+                    'logo' => [
+                        '@type' => 'ImageObject',
+                        'url' => asset('images/logo.png')
+                    ]
+                ],
+                'description' => Str::limit(strip_tags($news->content), 160),
+                'mainEntityOfPage' => [
+                    '@type' => 'WebPage',
+                    '@id' => route('news.show', $news->slug)
+                ],
+                'breadcrumb' => [
+                    '@type' => 'BreadcrumbList',
+                    'itemListElement' => [
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 1,
+                            'name' => 'Home',
+                            'item' => route('home')
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 2,
+                            'name' => 'Berita',
+                            'item' => route('news.index')
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 3,
+                            'name' => $news->category->name,
+                            'item' => route('news.category', $news->category->slug)
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 4,
+                            'name' => $news->title,
+                            'item' => route('news.show', $news->slug)
+                        ]
+                    ]
+                ]
+            ];
+        }
+
         // Get related news articles (will respect global scope)
         $relatedNews = $this->newsService->getRelatedNews($news->id, 4);
 
@@ -66,7 +141,7 @@ class NewsWebController extends Controller
         $trackingService = app(NewsTrackingService::class);
         $tracking = $trackingService->trackView($news->id, $request);
 
-        return view('news.detail', compact('news', 'categories', 'tracking', 'relatedNews'));
+        return view('news.detail', compact('news', 'categories', 'tracking', 'relatedNews', 'seoData'));
     }
 
     /**
@@ -79,6 +154,13 @@ class NewsWebController extends Controller
 
         $query = $request->input('query');
         $category = $request->input('category'); // Optional category filter
+
+        // SEO for search pages (usually should be noindex)
+        $seoData = new SEOData(
+            title: "Hasil Pencarian: $query",
+            description: "Hasil pencarian berita untuk \"$query\" di ApCom Solutions.",
+            robots: 'noindex,follow' // Prevent search pages from being indexed
+        );
 
         // Get search results from service (will respect global scope)
         $news = $this->newsService->searchNews($query);
@@ -105,7 +187,8 @@ class NewsWebController extends Controller
         return view('news.index', [
             'news' => $paginatedNews,
             'categories' => $categories,
-            'searchQuery' => $query
+            'searchQuery' => $query,
+            'seoData' => $seoData
         ]);
     }
 
@@ -115,6 +198,13 @@ class NewsWebController extends Controller
     public function category($slug, Request $request)
     {
         $category = NewsCategory::where('slug', $slug)->firstOrFail();
+
+        // SEO for category pages
+        $seoData = new SEOData(
+            title: "Kategori: {$category->name}",
+            description: "Berita terbaru tentang {$category->name} dari ApCom Solutions.",
+            url: route('news.category', $slug)
+        );
 
         // Global scope will filter for published articles only
         $news = News::where('news_category_id', $category->id)
@@ -151,7 +241,8 @@ class NewsWebController extends Controller
             'news' => $paginatedNews,
             'categories' => $categories,
             'currentCategory' => $category->name,
-            'category' => $category // Pass the full category model for additional info
+            'category' => $category, // Pass the full category model for additional info
+            'seoData' => $seoData
         ]);
     }
 

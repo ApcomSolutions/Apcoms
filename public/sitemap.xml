@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+    <url>
+        <loc>http://localhost:8000</loc>
+    
+            </url>
+    <url>
+        <loc>http://localhost:8000/about</loc>
+    
+            </url>
+    <url>
+        <loc>http://localhost:8000/contact</loc>
+    
+            </url>
+    <url>
+        <loc>http://localhost:8000/insights</loc>
+    
+            </url>
+    <url>
+        <loc>http://localhost:8000/news</loc>
+    
+            </url>
+    <url>
+        <loc>http://localhost:8000/insights/category/karya-ilmiah</loc>
+    
+            </url>
+    <url>
+        <loc>http://localhost:8000/insights/category/karya-tulis</loc>
+        <lastmod>2025-03-09T23:51:51+00:00</lastmod>
+
+            </url>
+    <url>
+        <loc>http://localhost:8000/news/category/berita-jawa-barat</loc>
+        <lastmod>2025-03-12T10:56:57+00:00</lastmod>
+
+            </url>
+    <url>
+        <loc>http://localhost:8000/news/category/cape-ges</loc>
+        <lastmod>2025-03-13T03:45:11+00:00</lastmod>
+
+            </url>
+    <url>
+        <loc>http://localhost:8000/insights/esensialitas-krusialitas-reputasi</loc>
+        <lastmod>2025-03-13T18:21:21+00:00</lastmod>
+
+            </url>
+    <url>
+        <loc>http://localhost:8000/insights/mengkaji-media-sosial-revolusi-digital-yang-mengubah-cara-kita-berinteraksi</loc>
+        <lastmod>2025-03-08T12:35:56+00:00</lastmod>
+
+            </url>
+    <url>
+        <loc>http://localhost:8000/insights/8-pilar-keunggulan-rahasia-perusahaan-paling-dikagumi-di-amerika</loc>
+        <lastmod>2025-03-13T07:50:27+00:00</lastmod>
+
+            </url>
+</urlset>

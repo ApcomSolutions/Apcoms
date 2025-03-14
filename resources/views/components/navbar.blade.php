@@ -19,7 +19,7 @@
                     class="border-transparent text-gray-700 hover:border-pink-400 hover:text-pink-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                     Home
                 </a>
-                <a href="about"
+                <a href="/about"
                     class="border-transparent text-gray-700 hover:border-pink-400 hover:text-pink-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                     About Us
                 </a>

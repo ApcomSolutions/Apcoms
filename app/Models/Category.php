@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use RalphJSmit\Laravel\SEO\Support\HasSEO;
 
-class Category extends Model{
-    use HasFactory;
+class Category extends Model
+{
+    use HasFactory, HasSEO;
+
     protected $table = 'categories';
     protected $fillable = ['name', 'slug', 'description'];
 
