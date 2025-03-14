@@ -2,7 +2,7 @@
     <x-navbar></x-navbar>
     {{-- Hero Section --}}
     <div
-        class="relative min-h-[80vh] flex items-center mt-10 py-70 justify-center px-6 md:px-12 overflow-hidden zoom-resposive">
+        class="relative min-h-[80vh] flex items-center mt-10 py-30 justify-center px-6 md:px-12 overflow-hidden zoom-resposive">
         <!-- Pola latar belakang dengan gradient dan shapes -->
         <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-pink-50 zoom-resposive">
             <!-- Decorative shapes -->
@@ -24,11 +24,8 @@
             <!-- Latar belakang teks -->
             <div class="md:w-[55%] w-full mb-8 md:mb-0 bg-white bg-opacity-80 p-8 rounded-lg shadow-lg">
                 <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 pb-2 gradient-text">
-                    Mitra Strategis Reputasi Digital Anda
+                    Membangun Reputasi, Menciptakan Solusi
                 </h1>
-                <h2 class="text-lg sm:text-xl md:text-2xl mb-6 font-medium text-gray-700">
-                    Membangun dan Mempertahankan Reputasi Terbaik di Era Digital
-                </h2>
                 <p class="text-gray-600 text-md md:text-lg mb-8">
                     Kami menggabungkan kreativitas, inovasi, dan pendekatan berkelanjutan untuk mendukung kebutuhan
                     komunikasi bisnis Anda. Dengan layanan unggulan mulai dari pendampingan humas kreatif hingga
