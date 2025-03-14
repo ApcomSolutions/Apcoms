@@ -1,16 +1,19 @@
 <x-layout>
     <x-navbar></x-navbar>
     {{-- Hero Section --}}
-    <div class="relative min-h-[80vh] flex items-center mt-10 py-40 justify-center py-20 px-6 md:px-12 overflow-hidden">
+    <div
+        class="relative min-h-[80vh] flex items-center mt-10 py-50 justify-center px-6 md:px-12 overflow-hidden zoom-resposive">
         <!-- Pola latar belakang dengan gradient dan shapes -->
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-pink-50">
-            <!-- Decorative shapes -->
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-100 via-white to-pink-50 zoom-resposive">
+            {{-- <!-- Decorative shapes -->
             <div class="absolute top-5 left-10 w-64 h-64 rounded-full bg-pink-300 opacity-70 mix-blend-multiply parallax"
                 data-speed="3"></div>
-            <div class="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-blue-300 opacity-70 mix-blend-multiply parallax"
-                data-speed="2"></div>
+            <div class="absolute bottom-10 right-10 parallax" data-speed="2">
+                <img src="{{ asset('images/globe.png') }}" alt="Globe"
+                    class="w-80 h-80 object-contain opacity-70 mix-blend-multiply">
+            </div>
             <div class="absolute top-1/4 right-1/4 w-40 h-40 rounded-full bg-indigo-400 opacity-60 mix-blend-multiply parallax"
-                data-speed="4"></div>
+                data-speed="4"></div> --}}
 
             <!-- Subtle grid pattern overlay -->
             <div class="absolute inset-0 opacity-10"
@@ -19,22 +22,23 @@
         </div>
 
         <!-- Container -->
-        <div class="container mx-auto flex flex-col md:flex-row items-center relative z-10">
-            <!-- Text Content -->
-            <div
-                class="md:w-[60%] w-full mb-8 md:mb-0 p-6 md:p-8 bg-white bg-opacity-80 rounded-lg shadow-lg backdrop-blur-sm border border-gray-100">
+        <div class="container flex flex-col md:flex-row items-center relative z-10 zoom-resposive">
+            <!-- Gambar globe sebagai background, lebih besar dan di belakang -->
+            <div class="absolute right-[-18%] top-1/2 transform -translate-y-1/2 md:w-[55%] hidden md:block z-0">
+                <img src="{{ asset('images/globe.png') }}" alt="Global Network"
+                    class="w-full h-auto object-contain float-animation scale-80 opacity-60">
+            </div>
+            <!-- Latar belakang teks -->
+            <div class="md:w-[55%] w-full mb-8 md:mb-0 bg-white bg-opacity-80 p-8 rounded-lg shadow-lg z-10 relative">
                 <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 pb-2 gradient-text">
-                    Mitra Strategis Reputasi Digital Anda
+                    Membangun Reputasi, Menciptakan Solusi
                 </h1>
-                <p class="text-lg sm:text-xl md:text-2xl mb-6 font-medium text-gray-700">
-                    Membangun dan Mempertahankan Reputasi Terbaik di Era Digital
-                </p>
-                <p class="text-sm sm:text-base md:text-lg mb-8 leading-relaxed text-gray-600">
+                <p class="text-gray-600 text-md md:text-lg mb-8">
                     Kami menggabungkan kreativitas, inovasi, dan pendekatan berkelanjutan untuk mendukung kebutuhan
                     komunikasi bisnis Anda. Dengan layanan unggulan mulai dari pendampingan humas kreatif hingga
                     publikasi ilmiah, kami siap membawa reputasi Anda ke tingkat yang lebih tinggi.
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4">
+                <div class="flex flex-col sm:flex-row gap-4 mt-6">
                     <a href="https://wa.me/628125881289"
                         class="bg-pink-500 hover:bg-pink-600 text-white font-medium py-3 px-8 rounded-full shadow-md transition duration-300 text-center">
                         Konsultasi Sekarang
@@ -47,6 +51,11 @@
                         </span>
                     </a>
                 </div>
+            </div>
+
+            <!-- Menambahkan div kosong di sebelah kanan untuk space -->
+            <div class="md:w-[45%] hidden md:block relative">
+                <!-- Space kosong yang tetap dipertahankan -->
             </div>
         </div>
     </div>
@@ -515,7 +524,7 @@
     }
 
     .float-animation {
-        animation: float 8s ease-in-out infinite;
+        animation: float 4s ease-in-out infinite;
     }
 
     /* Bubble Animation untuk About Us Section */
@@ -628,5 +637,4 @@
             easing: 'ease-in-out-sine', // Default easing untuk animasi AOS
         });
     });
-
 </script>

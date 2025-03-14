@@ -85,20 +85,15 @@
                             <a href="{{ route('insights.index') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Insight</a>
                             <a href="{{ route('news.index') }}"
-                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">News</a>
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">News</a>
                         </div>
                     </div>
                 </div>
 
-                <a href="/contact"
-                    class="border-transparent text-gray-700 hover:border-pink-400 hover:text-pink-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                    Contact Us
-                </a>
-
                 <!-- Contact button integrated into main nav -->
-                <a type="button" href="/login"
+                <a type="contact" href="/contact"
                     class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                    Login
+                    Contact Us
                 </a>
             </div>
 
@@ -122,9 +117,9 @@
     <!-- Mobile menu -->
     <div x-show="mobileMenuOpen" class="sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <a href="#"
+            <a href="/"
                 class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800">Home</a>
-            <a href="#"
+            <a href="/contact"
                 class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800">About
                 Us</a>
 
@@ -175,17 +170,17 @@
                     </svg>
                 </button>
                 <div x-show="insightOpen" class="pl-6">
-                    <a href="#"
+                    <a href="{{ route('insights.index') }}"
                         class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700">Insight</a>
-                    <a href="#"
+                    <a href="{{ route('news.index') }}"
                         class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700">News</a>
                 </div>
             </div>
 
             <!-- Mobile Login Button -->
-            <a href="/login"
+            <a href="/contact"
                 class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-pink-500 hover:bg-gray-50 hover:border-pink-300 hover:text-pink-700">
-                Login
+                Contact Us
             </a>
         </div>
     </div>
