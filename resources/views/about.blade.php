@@ -3,7 +3,7 @@
     <x-navbar></x-navbar>
 
     <!-- About Us Section dengan padding tambahan di kiri dan kanan -->
-    <div class="container mx-auto py-12 px-6 md:px-12 lg:px-24 mt-10">
+    <div class="container mx-auto py-30 px-6 md:px-12 lg:px-24 mt-10">
         <div class="flex flex-col md:flex-row items-center justify-between gap-12">
             <!-- Bagian Kiri: About Us, Nama Perusahaan, dan Deskripsi -->
             <div class="w-full md:w-1/2 space-y-6">
@@ -41,14 +41,14 @@
             <div class="w-full md:w-1/2 flex justify-center">
                 <div class="rounded-image-container w-full max-w-xl">
                     <img src="{{ asset('images/about.png') }}" alt="Tim Kerja PT. Solusi Komunikasi Terapan"
-                         class="w-full h-auto">
+                        class="w-full h-auto">
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Why Choose Us Section with blue-100 background -->
-    <div class="bg-blue-100 py-16 px-6 md:px-12 lg:px-24">
+    <div class="bg-blue-100 py-40 px-6 md:px-12 lg:px-24">
         <div class="container mx-auto">
             <div class="flex flex-col md:flex-row items-start justify-between gap-12">
                 <!-- Bagian Kiri: Judul dan Deskripsi -->
