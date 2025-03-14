@@ -17,7 +17,7 @@
                         {{ \Carbon\Carbon::parse($insight->TanggalTerbit)->format('d M Y') }}</p>
 
                     @if ($insight->image_url)
-                        <img src="{{ $insight->image_url }}" class="w-1/4 mx-auto h-auto rounded-lg mb-8 shadow-md"
+                        <img src="{{ $insight->image_url }}" class="w-3/4 mx-auto h-auto rounded-lg mb-8 shadow-md"
                             alt="{{ $insight->judul }}">
                     @endif
 
@@ -39,13 +39,13 @@
                         results: [],
                         searching: false,
                         debounceTimer: null,
-                    
+
                         handleSearch() {
                             this.query = this.$refs.searchInput.value.trim();
-                    
+
                             // Clear previous timeout
                             clearTimeout(this.debounceTimer);
-                    
+
                             if (this.query.length > 0) {
                                 this.searching = true;
                                 this.results = [];
@@ -56,11 +56,11 @@
                                 this.$refs.searchResults.classList.add('hidden');
                                 return;
                             }
-                    
+
                             // Debounce search requests
                             this.debounceTimer = setTimeout(() => {
                                 if (this.query.length < 2) return;
-                    
+
                                 fetch(`/api/insights/search?query=${encodeURIComponent(this.query)}`)
                                     .then(response => {
                                         if (!response.ok) {
@@ -79,7 +79,7 @@
                                     });
                             }, 300);
                         },
-                    
+
                         formatDate(dateString) {
                             return new Date(dateString).toLocaleDateString('id-ID', {
                                 day: 'numeric',
