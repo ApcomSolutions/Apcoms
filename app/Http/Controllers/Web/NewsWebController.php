@@ -13,6 +13,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
+use Carbon\Carbon;
 
 class NewsWebController extends Controller
 {
@@ -60,16 +61,15 @@ class NewsWebController extends Controller
     /**
      * Display the specified news.
      */
+
     public function show(string $slug, Request $request)
     {
-        // Global scope will automatically filter for published only
         $news = News::with('category')
             ->where('slug', $slug)
             ->firstOrFail();
 
         $categories = NewsCategory::withCount('news')->get();
 
-        // SEO for news detail page
         $seoData = new SEOData(
             title: $news->title,
             description: Str::limit(strip_tags($news->content), 160),
@@ -77,14 +77,13 @@ class NewsWebController extends Controller
             url: route('news.show', $news->slug)
         );
 
-        // Create breadcrumbs for structured data
         if ($news->category) {
             $seoData->jsonLd = [
                 '@type' => 'NewsArticle',
                 'headline' => $news->title,
                 'image' => $news->image_url,
-                'datePublished' => $news->publish_date->toIso8601String(),
-                'dateModified' => $news->updated_at->toIso8601String(),
+                'datePublished' => Carbon::parse($news->publish_date)->toIso8601String(),
+                'dateModified' => Carbon::parse($news->updated_at)->toIso8601String(),
                 'author' => [
                     '@type' => 'Person',
                     'name' => $news->author
@@ -134,10 +133,7 @@ class NewsWebController extends Controller
             ];
         }
 
-        // Get related news articles (will respect global scope)
         $relatedNews = $this->newsService->getRelatedNews($news->id, 4);
-
-        // Create a tracking record and pass it to the view
         $trackingService = app(NewsTrackingService::class);
         $tracking = $trackingService->trackView($news->id, $request);
 
