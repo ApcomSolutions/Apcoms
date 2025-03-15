@@ -13,12 +13,21 @@
                 <!-- Main Content -->
                 <div class="md:w-2/3">
                     <h1 class="text-3xl font-bold mb-4 text-gray-800">{{ $insight->judul }}</h1>
-                    <p class="text-gray-600 mb-6">Penulis: {{ $insight->penulis }} | Terbit:
+                    <p class="text-gray-600 mb-2">Penulis: {{ $insight->penulis }} | Terbit:
                         {{ \Carbon\Carbon::parse($insight->TanggalTerbit)->format('d M Y') }}</p>
+
+                    <!-- View count display -->
+                    <p class="text-gray-600 mb-6 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-pink-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                        </svg>
+                        Insight ini telah dibaca {{ number_format($insight->trackings()->count()) }} kali
+                    </p>
 
                     @if ($insight->image_url)
                         <img src="{{ $insight->image_url }}" class="w-3/4 mx-auto h-auto rounded-lg mb-8 shadow-md"
-                            alt="{{ $insight->judul }}">
+                             alt="{{ $insight->judul }}">
                     @endif
 
                     <div class="prose max-w-none mb-8 bg-white p-6 rounded-lg shadow-md">
@@ -27,7 +36,7 @@
 
                     <div class="mb-8">
                         <a href="{{ route('insights.index') }}"
-                            class="inline-block px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition duration-200">Kembali</a>
+                           class="inline-block px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition duration-200">Kembali</a>
                     </div>
                 </div>
 
@@ -92,13 +101,13 @@
                         <div class="border-t-2 border-indigo-500 w-16 mb-6"></div>
                         <div class="relative">
                             <input type="text" x-ref="searchInput" id="search-input" placeholder="Search..."
-                                class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                @input="handleSearch()">
+                                   class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                   @input="handleSearch()">
                             <span class="absolute right-2 top-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
+                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </span>
                         </div>
@@ -113,14 +122,14 @@
                                 <template x-for="item in results.slice(0, 5)" :key="item.id">
                                     <div class="border-b pb-2">
                                         <a :href="`/insights/${item.slug}`" class="text-gray-700 hover:text-indigo-600"
-                                            x-text="item.judul"></a>
+                                           x-text="item.judul"></a>
                                         <p class="text-xs text-gray-500" x-text="formatDate(item.TanggalTerbit)"></p>
                                     </div>
                                 </template>
                                 <template x-if="results.length > 5">
                                     <div class="text-center mt-2">
                                         <a :href="`/insights?query=${encodeURIComponent(query)}`"
-                                            class="text-indigo-600 hover:text-indigo-800 text-sm">
+                                           class="text-indigo-600 hover:text-indigo-800 text-sm">
                                             View all <span x-text="results.length"></span> results
                                         </a>
                                     </div>
@@ -129,18 +138,34 @@
                         </div>
                     </div>
 
+                    <x-top-insights class="mb-6" />
+
                     <!-- Categories Section -->
                     <div class="bg-white p-6 rounded-lg shadow-md">
                         <h2 class="text-xl font-semibold mb-4">Categories</h2>
                         <div class="border-t-2 border-indigo-500 w-16 mb-6"></div>
                         <ul class="space-y-4">
-                            @foreach ($categories as $category)
+                            @foreach ($categories->whereNull('parent_id') as $parentCategory)
                                 <li class="border-b pb-2">
-                                    <a href="{{ route('insights.category', $category->slug) }}"
-                                        class="flex justify-between items-center text-gray-700 hover:text-indigo-600 transition">
-                                        <span>{{ $category->name }}</span>
-                                        <span class="text-gray-500">({{ $category->insights_count }})</span>
+                                    <a href="{{ route('insights.category', $parentCategory->slug) }}"
+                                       class="flex justify-between items-center text-gray-700 hover:text-indigo-600 transition font-medium">
+                                        <span>{{ $parentCategory->name }}</span>
+                                        <span class="text-gray-500">({{ $parentCategory->insights_count }})</span>
                                     </a>
+
+                                    @if($parentCategory->children && $parentCategory->children->count() > 0)
+                                        <ul class="pl-4 mt-2 space-y-2">
+                                            @foreach($parentCategory->children as $childCategory)
+                                                <li>
+                                                    <a href="{{ route('insights.category', $childCategory->slug) }}"
+                                                       class="flex justify-between items-center text-gray-700 hover:text-indigo-600 transition">
+                                                        <span>— {{ $childCategory->name }}</span>
+                                                        <span class="text-gray-500">({{ $childCategory->insights_count }})</span>
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>
@@ -247,19 +272,19 @@
                     function sendReadingTime(completed = false) {
                         const data = {
                             tracking_id: trackingId,
-                            seconds: readTimeInSeconds,
-                            completed: completed
+                            read_time_seconds: readTimeInSeconds,
+                            is_completed: completed
                         };
 
                         fetch('/api/tracking/read-time', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                        'content')
-                                },
-                                body: JSON.stringify(data)
-                            })
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            },
+                            body: JSON.stringify(data)
+                        })
                             .catch(error => {
                                 console.error('Error updating read time:', error);
                             });
@@ -286,5 +311,5 @@
                     }
                 });
             </script>
-        @endpush
+    @endpush
 </x-layout>

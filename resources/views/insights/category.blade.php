@@ -8,7 +8,20 @@
         <div class="container mx-auto px-4">
             {{-- Category Header with Description --}}
             <div class="mb-8 mt-8">
-                <h1 class="text-3xl font-bold text-center">Kategori: {{ $currentCategory }}</h1>
+                @if(isset($category) && $category->parent_id)
+                    {{-- For subcategory, show parent > child structure --}}
+                    <h1 class="text-3xl font-bold text-center">
+                        <a href="{{ route('insights.category', $category->parent->slug) }}" class="text-gray-500 hover:text-pink-500">
+                            {{ $category->parent->name }}
+                        </a>
+                        <span class="mx-2 text-gray-400">&raquo;</span>
+                        <span class="text-pink-600">{{ $category->name }}</span>
+                    </h1>
+                @else
+                    {{-- For parent category, show normal title --}}
+                    <h1 class="text-3xl font-bold text-center">Kategori: {{ $currentCategory }}</h1>
+                @endif
+
                 @if(isset($category) && $category->description)
                     <p class="text-center text-gray-600 mt-2">{{ $category->description }}</p>
                 @endif
@@ -40,7 +53,7 @@
                 </form>
             </div>
 
-            {{-- Category selector --}}
+            {{-- Category filters with dropdown --}}
             <div class="mb-8">
                 <div class="flex flex-wrap gap-2 justify-center">
                     <a href="{{ route('insights.index') }}"
@@ -48,11 +61,35 @@
                         Semua
                     </a>
 
-                    @foreach($categories as $cat)
-                        <a href="{{ route('insights.category', $cat->slug) }}"
-                           class="px-3 py-1 rounded-full {{ $currentCategory == $cat->name ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }} transition">
-                            {{ $cat->name }} ({{ $cat->insights_count }})
-                        </a>
+                    @foreach($categories->whereNull('parent_id') as $parentCategory)
+                        <div class="relative dropdown-container">
+                            <button type="button"
+                                    onclick="toggleDropdown('dropdown-{{ $parentCategory->id }}')"
+                                    class="px-3 py-1 rounded-full {{ isset($category) && $category->id == $parentCategory->id ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }} transition inline-flex items-center gap-1">
+                                {{ $parentCategory->name }} ({{ $parentCategory->children->count() }})
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+
+                            <div id="dropdown-{{ $parentCategory->id }}" class="dropdown-menu absolute left-0 mt-1 w-60 bg-white rounded-md shadow-lg overflow-hidden z-10 hidden">
+                                {{-- Direct link to parent category --}}
+                                <a href="{{ route('insights.category', $parentCategory->slug) }}"
+                                   class="block px-4 py-2 text-sm {{ isset($category) && $category->id == $parentCategory->id ? 'bg-pink-50 text-pink-600' : 'text-gray-700 hover:bg-pink-50 hover:text-pink-600' }}">
+                                    {{ $parentCategory->name }} (Semua)
+                                </a>
+
+                                <div class="border-t border-gray-100"></div>
+
+                                {{-- Child categories --}}
+                                @foreach($parentCategory->children as $childCategory)
+                                    <a href="{{ route('insights.category', $childCategory->slug) }}"
+                                       class="block px-4 py-2 text-sm {{ isset($category) && $category->id == $childCategory->id ? 'bg-pink-50 text-pink-600' : 'text-gray-700 hover:bg-pink-50 hover:text-pink-600' }}">
+                                        {{ $childCategory->name }} ({{ $childCategory->insights_count }})
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
                     @endforeach
                 </div>
             </div>
@@ -159,6 +196,38 @@
             @endif
         </div>
     </div>
+
+    {{-- Add this script section at the bottom of your layout or directly in the page --}}
+    <script>
+        function toggleDropdown(dropdownId) {
+            // Get the dropdown element
+            const dropdown = document.getElementById(dropdownId);
+
+            // Close all other dropdowns first
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                if (menu.id !== dropdownId) {
+                    menu.classList.add('hidden');
+                }
+            });
+
+            // Toggle the current dropdown
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const isDropdownButton = event.target.closest('button') &&
+                event.target.closest('button').getAttribute('onclick') &&
+                event.target.closest('button').getAttribute('onclick').includes('toggleDropdown');
+
+            // If the click was not on a dropdown button, close all dropdowns
+            if (!isDropdownButton) {
+                document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
+                    dropdown.classList.add('hidden');
+                });
+            }
+        });
+    </script>
 
     <x-footer />
 </x-layout>

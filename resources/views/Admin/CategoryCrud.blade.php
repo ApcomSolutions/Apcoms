@@ -1,164 +1,196 @@
-{{-- resources/views/Admin/CategoryCrud.blade.php --}}
+{{-- resources/views/insights/category.blade.php --}}
 <x-layout>
-    <x-slot:title>Category Management Dashboard</x-slot:title>
+    <x-slot:title>{{ $currentCategory }} - Insights</x-slot:title>
 
-{{--    <!-- Header -->--}}
-{{--    <header class="header-gradient text-white py-4 px-6">--}}
-{{--        <div class="container mx-auto flex justify-between items-center">--}}
-{{--            <div class="flex items-center">--}}
-{{--                <h1 class="text-2xl font-bold">Category Manager</h1>--}}
-{{--                <span class="ml-4 px-2 py-1 bg-white/20 rounded text-xs">Admin Panel</span>--}}
-{{--            </div>--}}
-{{--            <div class="flex space-x-4">--}}
-{{--                <a href="/admin/dashboard" class="flex items-center text-white hover:text-indigo-100">--}}
-{{--                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">--}}
-{{--                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />--}}
-{{--                    </svg>--}}
-{{--                    Dashboard--}}
-{{--                </a>--}}
-{{--                <a href="/admin/insights" class="flex items-center text-white hover:text-indigo-100">--}}
-{{--                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">--}}
-{{--                        <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clip-rule="evenodd" />--}}
-{{--                        <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />--}}
-{{--                    </svg>--}}
-{{--                    Articles--}}
-{{--                </a>--}}
-{{--                <a href="/admin/categories" class="flex items-center text-white hover:text-indigo-100 font-semibold">--}}
-{{--                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">--}}
-{{--                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />--}}
-{{--                    </svg>--}}
-{{--                    Categories--}}
-{{--                </a>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </header>--}}
+    <x-navbar />
 
-    @include('Admin.Partials.AdminHeader', [
-    'title' => 'Category Manager',
-    'subtitle' => 'Admin Panel'
-])
+    <div class="bg-white py-10">
+        <div class="container mx-auto px-4">
+            {{-- Category Header with Description --}}
+            <div class="mb-8 mt-8">
+                @if(isset($category) && $category->parent_id)
+                    {{-- For subcategory, show parent > child structure --}}
+                    <h1 class="text-3xl font-bold text-center">
+                        <a href="{{ route('insights.category', $category->parent->slug) }}" class="text-gray-500 hover:text-pink-500">
+                            {{ $category->parent->name }}
+                        </a>
+                        <span class="mx-2 text-gray-400">&raquo;</span>
+                        <span class="text-pink-600">{{ $category->name }}</span>
+                    </h1>
+                @else
+                    {{-- For parent category, show normal title --}}
+                    <h1 class="text-3xl font-bold text-center">Kategori: {{ $currentCategory }}</h1>
+                @endif
 
-    <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-6 py-8">
-        <div class="mb-8 flex justify-between items-center">
-            <h2 class="text-3xl font-bold text-gray-800">Category Management</h2>
-            <div class="flex space-x-2">
-                <button id="refresh-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                    </svg>
-                    Refresh
-                </button>
-                <button id="new-category-btn" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
-                    New Category
-                </button>
+                @if(isset($category) && $category->description)
+                    <p class="text-center text-gray-600 mt-2">{{ $category->description }}</p>
+                @endif
             </div>
-        </div>
 
-        <!-- Search -->
-        <div class="card p-4 mb-6">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div class="relative w-full md:w-1/3">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <input type="text" id="search" placeholder="Search categories..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:ring-indigo-500 focus:border-indigo-500">
+            {{-- Back to all insights link --}}
+            <div class="mb-6">
+                <a href="{{ route('insights.index') }}" class="inline-flex items-center text-pink-500 hover:text-pink-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Kembali ke Semua Insight
+                </a>
+            </div>
+
+            {{-- Search form --}}
+            <div class="mb-8 max-w-md mx-auto">
+                <form action="{{ route('insights.search') }}" method="GET" class="flex gap-2">
+                    <input
+                        type="text"
+                        name="query"
+                        placeholder="Cari artikel dalam kategori ini..."
+                        class="flex-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    >
+                    <input type="hidden" name="category" value="{{ isset($category) ? $category->slug : '' }}">
+                    <button type="submit" class="bg-pink-500 text-white px-4 py-2 rounded-md hover:bg-pink-600 transition">
+                        Cari
+                    </button>
+                </form>
+            </div>
+
+            {{-- Category selector --}}
+            <div class="mb-8">
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <a href="{{ route('insights.index') }}"
+                       class="px-3 py-1 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition">
+                        Semua
+                    </a>
+
+                    @foreach($categories->whereNull('parent_id') as $parentCategory)
+                        {{-- Parent category --}}
+                        <a href="{{ route('insights.category', $parentCategory->slug) }}"
+                           class="px-3 py-1 rounded-full {{ isset($category) && $category->id == $parentCategory->id ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }} transition">
+                            {{ $parentCategory->name }} ({{ $parentCategory->insights_count }})
+                        </a>
+
+                        {{-- Child categories - indent or style differently --}}
+                        @foreach($parentCategory->children as $childCategory)
+                            <a href="{{ route('insights.category', $childCategory->slug) }}"
+                               class="px-3 py-1 rounded-full border {{ isset($category) && $category->id == $childCategory->id ? 'border-pink-500 bg-pink-50 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50' }} transition text-sm">
+                                {{ $parentCategory->name }} — {{ $childCategory->name }} ({{ $childCategory->insights_count }})
+                            </a>
+                        @endforeach
+                    @endforeach
                 </div>
             </div>
-        </div>
 
-        <!-- Categories Table -->
-        <div class="card overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Articles Count</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody id="categories-table-body" class="bg-white divide-y divide-gray-200">
-                    <!-- Categories will be populated via JavaScript -->
-                    <tr>
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading categories...</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <!-- Pagination -->
-            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-sm text-gray-700">
-                            Showing <span class="font-medium" id="page-start">1</span> to <span class="font-medium" id="page-end">10</span> of <span class="font-medium" id="total-categories">--</span> results
-                        </p>
-                    </div>
-                    <div>
-                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                            <button id="prev-page" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            @if(count($insights) > 0)
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach ($insights as $insight)
+                        <div class="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
+                            {{-- Tampilkan gambar jika ada --}}
+                            @if (isset($insight['image_url']) && $insight['image_url'])
+                                <img src="{{ $insight['image_url'] }}" class="w-full h-48 object-cover"
+                                     alt="{{ $insight['judul'] }}">
+                            @else
+                                <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                            @endif
+
+                            <div class="p-4 flex flex-col flex-grow">
+                                <h5 class="text-lg font-semibold mb-2">{{ $insight['judul'] }}</h5>
+                                <p class="text-gray-700 text-sm mb-4 flex-grow">
+                                    {{ Str::limit(strip_tags($insight['isi']), 100, '...') }}
+                                </p>
+
+                                <div class="mt-auto">
+                                    <div class="flex justify-between text-gray-500 text-xs mb-3">
+                                        <div>
+                                            <p>Penulis: {{ $insight['penulis'] }}</p>
+                                            <!-- Display view count -->
+                                            <p class="mt-1 flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                                </svg>
+                                                {{ number_format($insight['view_count'] ?? 0) }} dilihat
+                                            </p>
+                                        </div>
+                                        <p>{{ \Carbon\Carbon::parse($insight['TanggalTerbit'])->format('d M Y') }}</p>
+                                    </div>
+
+                                    <a href="{{ route('insights.show', $insight['slug']) }}"
+                                       class="block w-full bg-pink-500 text-white text-center py-2 rounded-md hover:bg-pink-600 transition">
+                                        Baca Selengkapnya
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-8">
+                    <p class="text-gray-600">Tidak ada artikel yang ditemukan dalam kategori ini.</p>
+                </div>
+            @endif
+
+            {{-- Pagination - styled using Tailwind --}}
+            @if ($insights instanceof \Illuminate\Pagination\LengthAwarePaginator && $insights->hasPages())
+                <div class="mt-8 flex justify-center">
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        {{-- Previous Page Link --}}
+                        @if ($insights->onFirstPage())
+                            <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-300">
                                 <span class="sr-only">Previous</span>
+                                <!-- Heroicon name: solid/chevron-left -->
                                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                     <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                                 </svg>
-                            </button>
-                            <div id="pagination-numbers" class="flex">
-                                <!-- Pagination numbers will be populated via JavaScript -->
-                                <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">1</button>
-                            </div>
-                            <button id="next-page" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            </span>
+                        @else
+                            <a href="{{ $insights->previousPageUrl() }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Previous</span>
+                                <!-- Heroicon name: solid/chevron-left -->
+                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        @endif
+
+                        {{-- Pagination Elements --}}
+                        @foreach ($insights->getUrlRange(max(1, $insights->currentPage() - 2), min($insights->lastPage(), $insights->currentPage() + 2)) as $page => $url)
+                            @if ($page == $insights->currentPage())
+                                <span aria-current="page" class="relative inline-flex items-center px-4 py-2 border border-pink-500 bg-pink-50 text-sm font-medium text-pink-600">
+                                    {{ $page }}
+                                </span>
+                            @else
+                                <a href="{{ $url }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    {{ $page }}
+                                </a>
+                            @endif
+                        @endforeach
+
+                        {{-- Next Page Link --}}
+                        @if ($insights->hasMorePages())
+                            <a href="{{ $insights->nextPageUrl() }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                 <span class="sr-only">Next</span>
+                                <!-- Heroicon name: solid/chevron-right -->
                                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                                 </svg>
-                            </button>
-                        </nav>
-                    </div>
+                            </a>
+                        @else
+                            <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-300">
+                                <span class="sr-only">Next</span>
+                                <!-- Heroicon name: solid/chevron-right -->
+                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        @endif
+                    </nav>
                 </div>
-            </div>
+            @endif
         </div>
-    </main>
+    </div>
 
-    <!-- Include the modals as separate components -->
-    @include('Admin.Components.CategoryModals')
-
-    @push('styles')
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .header-gradient {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-        }
-        .card {
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-        }
-
-        /* Modal Styles */
-        .modal {
-            transition: opacity 0.25s ease;
-        }
-        .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        .modal-container {
-            max-height: 90vh;
-        }
-    </style>
-    @endpush
-
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @endpush
-
-    @push('page_scripts')
-    @vite(['resources/js/admin/category-crud.js'])
-    @endpush
+    <x-footer />
 </x-layout>

@@ -248,12 +248,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Fetch Categories from API
+    // Fetch Categories from API with hierarchical structure
     async function fetchCategories() {
         try {
-            const response = await fetch('/api/categories');
+            // Change the API endpoint to get parent-child hierarchy
+            const response = await fetch('/api/categories?parent_only=true');
             if (!response.ok) throw new Error('Failed to fetch categories');
 
-            categories = await response.json();
+            const data = await response.json();
+            categories = data; // Store the hierarchical data
 
             // Populate category filters
             const categoryFilter = document.getElementById('category-filter');
@@ -273,19 +276,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 formCategorySelect.remove(1);
             }
 
-            // Add new options
-            categories.forEach(category => {
-                // For filter
-                const filterOption = document.createElement('option');
-                filterOption.value = category.id;
-                filterOption.textContent = category.name;
-                categoryFilter.appendChild(filterOption);
+            // Add parent categories and their subcategories
+            data.forEach(category => {
+                // Add parent to filter dropdown
+                const filterParentOption = document.createElement('option');
+                filterParentOption.value = category.id;
+                filterParentOption.textContent = category.name;
+                filterParentOption.style.fontWeight = 'bold';
+                categoryFilter.appendChild(filterParentOption);
 
-                // For form
-                const formOption = document.createElement('option');
-                formOption.value = category.id;
-                formOption.textContent = category.name;
-                formCategorySelect.appendChild(formOption);
+                // Add parent to form dropdown
+                const formParentOption = document.createElement('option');
+                formParentOption.value = category.id;
+                formParentOption.textContent = category.name;
+                formParentOption.style.fontWeight = 'bold';
+                formCategorySelect.appendChild(formParentOption);
+
+                // Add subcategories with indentation if they exist
+                if (category.children && category.children.length > 0) {
+                    category.children.forEach(subcategory => {
+                        // Add subcategory to filter
+                        const filterSubOption = document.createElement('option');
+                        filterSubOption.value = subcategory.id;
+                        filterSubOption.textContent = `— ${subcategory.name}`;
+                        filterSubOption.style.paddingLeft = '15px';
+                        categoryFilter.appendChild(filterSubOption);
+
+                        // Add subcategory to form dropdown
+                        const formSubOption = document.createElement('option');
+                        formSubOption.value = subcategory.id;
+                        formSubOption.textContent = `— ${subcategory.name}`;
+                        formSubOption.style.paddingLeft = '15px';
+                        formCategorySelect.appendChild(formSubOption);
+                    });
+                }
             });
         } catch (error) {
             console.error('Error fetching categories:', error);
