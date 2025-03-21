@@ -35,3 +35,28 @@
     transform: scale(0.9);
     transition: opacity 300ms, transform 300ms;
 }
+
+select option[style*="fontWeight: bold"] {
+    font-weight: bold !important;
+    color: #000;
+    background-color: #f3f4f6;
+}
+
+select option[style*="paddingLeft"] {
+    padding-left: 15px !important;
+    color: #4B5563;
+}
+
+/* For Firefox which doesn't respect option styling */
+@-moz-document url-prefix() {
+    select#category_id option,
+    select#category-filter option {
+        padding-left: 0 !important;
+    }
+
+    /* Use text formatting instead for Firefox */
+    select#category_id option[style*="paddingLeft"],
+    select#category-filter option[style*="paddingLeft"] {
+        text-indent: 15px;
+    }
+}

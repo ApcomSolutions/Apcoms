@@ -30,7 +30,7 @@
                 </form>
             </div>
 
-            {{-- Category filters --}}
+            {{-- Category filters with dropdown --}}
             <div class="mb-8">
                 <div class="flex flex-wrap gap-2 justify-center">
                     <a href="{{ route('insights.index') }}"
@@ -38,11 +38,35 @@
                         Semua
                     </a>
 
-                    @foreach($categories as $category)
-                        <a href="{{ route('insights.category', $category->slug) }}"
-                           class="px-3 py-1 rounded-full {{ isset($currentCategory) && $currentCategory == $category->name ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }} transition">
-                            {{ $category->name }} ({{ $category->insights_count }})
-                        </a>
+                    @foreach($categories->whereNull('parent_id') as $parentCategory)
+                        <div class="relative dropdown-container">
+                            <button type="button"
+                                    onclick="toggleDropdown('dropdown-{{ $parentCategory->id }}')"
+                                    class="px-3 py-1 rounded-full {{ isset($currentCategory) && $currentCategory == $parentCategory->name ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }} transition inline-flex items-center gap-1">
+                                {{ $parentCategory->name }} ({{ $parentCategory->children->count() }})
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+
+                            <div id="dropdown-{{ $parentCategory->id }}" class="dropdown-menu absolute left-0 mt-1 w-60 bg-white rounded-md shadow-lg overflow-hidden z-10 hidden">
+                                {{-- Direct link to parent category --}}
+                                <a href="{{ route('insights.category', $parentCategory->slug) }}"
+                                   class="block px-4 py-2 text-sm {{ isset($currentCategory) && $currentCategory == $parentCategory->name ? 'bg-pink-50 text-pink-600' : 'text-gray-700 hover:bg-pink-50 hover:text-pink-600' }}">
+                                    {{ $parentCategory->name }} (Semua)
+                                </a>
+
+                                <div class="border-t border-gray-100"></div>
+
+                                {{-- Child categories --}}
+                                @foreach($parentCategory->children as $childCategory)
+                                    <a href="{{ route('insights.category', $childCategory->slug) }}"
+                                       class="block px-4 py-2 text-sm {{ isset($currentCategory) && $currentCategory == $childCategory->name ? 'bg-pink-50 text-pink-600' : 'text-gray-700 hover:bg-pink-50 hover:text-pink-600' }}">
+                                        {{ $childCategory->name }} ({{ $childCategory->insights_count }})
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
                     @endforeach
                 </div>
             </div>
@@ -80,7 +104,17 @@
 
                                 <div class="mt-auto">
                                     <div class="flex justify-between text-gray-500 text-xs mb-3">
-                                        <p>Penulis: {{ $insight['penulis'] }}</p>
+                                        <div>
+                                            <p>Penulis: {{ $insight['penulis'] }}</p>
+                                            <!-- Display view count -->
+                                            <p class="mt-1 flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                                </svg>
+                                                {{ number_format($insight['view_count'] ?? 0) }} dilihat
+                                            </p>
+                                        </div>
                                         <p>{{ \Carbon\Carbon::parse($insight['TanggalTerbit'])->format('d M Y') }}</p>
                                     </div>
 
@@ -158,6 +192,38 @@
             @endif
         </div>
     </div>
+
+    {{-- Add this script section at the bottom of your layout or directly in the page --}}
+    <script>
+        function toggleDropdown(dropdownId) {
+            // Get the dropdown element
+            const dropdown = document.getElementById(dropdownId);
+
+            // Close all other dropdowns first
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                if (menu.id !== dropdownId) {
+                    menu.classList.add('hidden');
+                }
+            });
+
+            // Toggle the current dropdown
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const isDropdownButton = event.target.closest('button') &&
+                event.target.closest('button').getAttribute('onclick') &&
+                event.target.closest('button').getAttribute('onclick').includes('toggleDropdown');
+
+            // If the click was not on a dropdown button, close all dropdowns
+            if (!isDropdownButton) {
+                document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
+                    dropdown.classList.add('hidden');
+                });
+            }
+        });
+    </script>
 
     <x-footer />
 </x-layout>

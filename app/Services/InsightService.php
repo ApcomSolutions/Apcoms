@@ -10,6 +10,7 @@ class InsightService
 {
     public function getAllInsights() {
         return Insight::with('category')
+            ->withCount('trackings as view_count')
             ->get()
             ->map(function ($insight) {
                 return [
@@ -22,12 +23,15 @@ class InsightService
                     'TanggalTerbit' => $insight->TanggalTerbit,
                     'category_id' => $insight->category_id,
                     'category_name' => $insight->category ? $insight->category->name : null,
+                    'view_count' => $insight->view_count,
                 ];
             });
     }
 
     public function getInsightById($id) {
-        $insight = Insight::with('category')->findOrFail($id);
+        $insight = Insight::with('category')
+            ->withCount('trackings as view_count') // Add view count
+            ->findOrFail($id);
 
         return [
             'id' => $insight->id,
@@ -39,11 +43,15 @@ class InsightService
             'TanggalTerbit' => $insight->TanggalTerbit,
             'category_id' => $insight->category_id,
             'category_name' => $insight->category ? $insight->category->name : null,
+            'view_count' => $insight->view_count, // Include view count
         ];
     }
 
     public function getInsightBySlug($slug) {
-        $insight = Insight::with('category')->where('slug', $slug)->firstOrFail();
+        $insight = Insight::with('category')
+            ->withCount('trackings as view_count') // Add view count
+            ->where('slug', $slug)
+            ->firstOrFail();
 
         return [
             'id' => $insight->id,
@@ -55,6 +63,7 @@ class InsightService
             'TanggalTerbit' => $insight->TanggalTerbit,
             'category_id' => $insight->category_id,
             'category_name' => $insight->category ? $insight->category->name : null,
+            'view_count' => $insight->view_count, // Include view count
         ];
     }
 
@@ -142,6 +151,7 @@ class InsightService
     public function searchInsights($query)
     {
         return Insight::with('category')
+            ->withCount('trackings as view_count') // Add view count
             ->where('judul', 'like', "%{$query}%")
             ->orWhere('isi', 'like', "%{$query}%")
             ->orWhere('penulis', 'like', "%{$query}%")
@@ -157,6 +167,7 @@ class InsightService
                     'TanggalTerbit' => $insight->TanggalTerbit,
                     'category_id' => $insight->category_id,
                     'category_name' => $insight->category ? $insight->category->name : null,
+                    'view_count' => $insight->view_count, // Include view count
                 ];
             });
     }

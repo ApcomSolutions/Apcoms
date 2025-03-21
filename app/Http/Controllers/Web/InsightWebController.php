@@ -37,7 +37,16 @@ class InsightWebController extends Controller
         );
 
         $insights = $this->insightService->getAllInsights();
-        $categories = Category::withCount('insights')->get();
+
+        // Get categories with children and counts
+        $categories = Category::withCount('insights')
+            ->with(['children' => function($query) {
+                $query->withCount('insights')->where('is_active', true)->orderBy('order');
+            }])
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get();
 
         // Convert to collection for pagination
         $collection = collect($insights);
@@ -58,27 +67,20 @@ class InsightWebController extends Controller
     /**
      * Display the specified resource.
      */
-//    public function show(string $slug, Request $request)
-//    {
-//        // Get raw insight model instead of array
-//        $insight = Insight::with('category')->where('slug', $slug)->firstOrFail();
-//        $categories = Category::withCount('insights')->get();
-//
-//        // Create a tracking record and pass it to the view
-//        $trackingService = app(TrackingService::class);
-//        $tracking = $trackingService->trackView($insight->id, $request);
-//
-//        return view('insights.detail', compact('insight', 'categories', 'tracking'));
-//    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $slug, Request $request)
     {
         // Get raw insight model instead of array
-        $insight = Insight::with('category')->where('slug', $slug)->firstOrFail();
-        $categories = Category::withCount('insights')->get();
+        $insight = Insight::with('category.parent')->where('slug', $slug)->firstOrFail();
+
+        // Get categories with children and counts
+        $categories = Category::withCount('insights')
+            ->with(['children' => function($query) {
+                $query->withCount('insights')->where('is_active', true)->orderBy('order');
+            }])
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get();
 
         // Set SEO for this insight
         $seoData = new SEOData(
@@ -90,36 +92,54 @@ class InsightWebController extends Controller
 
         // Create breadcrumbs for structured data
         if ($insight->category) {
+            $breadcrumbItems = [
+                [
+                    '@type' => 'ListItem',
+                    'position' => 1,
+                    'name' => 'Home',
+                    'item' => route('home')
+                ],
+                [
+                    '@type' => 'ListItem',
+                    'position' => 2,
+                    'name' => 'Insights',
+                    'item' => route('insights.index')
+                ]
+            ];
+
+            $position = 3;
+
+            // If this insight is in a subcategory, add the parent category first
+            if ($insight->category->parent) {
+                $breadcrumbItems[] = [
+                    '@type' => 'ListItem',
+                    'position' => $position++,
+                    'name' => $insight->category->parent->name,
+                    'item' => route('insights.category', $insight->category->parent->slug)
+                ];
+            }
+
+            // Add the direct category
+            $breadcrumbItems[] = [
+                '@type' => 'ListItem',
+                'position' => $position++,
+                'name' => $insight->category->name,
+                'item' => route('insights.category', $insight->category->slug)
+            ];
+
+            // Add the current insight
+            $breadcrumbItems[] = [
+                '@type' => 'ListItem',
+                'position' => $position,
+                'name' => $insight->judul,
+                'item' => route('insights.show', $insight->slug)
+            ];
+
             $seoData->jsonLd = [
                 '@type' => 'Article',
                 'breadcrumb' => [
                     '@type' => 'BreadcrumbList',
-                    'itemListElement' => [
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 1,
-                            'name' => 'Home',
-                            'item' => route('home')
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 2,
-                            'name' => 'Insights',
-                            'item' => route('insights.index')
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 3,
-                            'name' => $insight->category->name,
-                            'item' => route('insights.category', $insight->category->slug)
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 4,
-                            'name' => $insight->judul,
-                            'item' => route('insights.show', $insight->slug)
-                        ]
-                    ]
+                    'itemListElement' => $breadcrumbItems
                 ]
             ];
         }
@@ -146,7 +166,16 @@ class InsightWebController extends Controller
             robots: 'noindex,follow' // Prevent search pages from being indexed
         );
         $insights = $this->insightService->searchInsights($query);
-        $categories = Category::withCount('insights')->get();
+
+        // Get categories with children and counts
+        $categories = Category::withCount('insights')
+            ->with(['children' => function($query) {
+                $query->withCount('insights')->where('is_active', true)->orderBy('order');
+            }])
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get();
 
         // Convert to collection for pagination
         $collection = collect($insights);
@@ -163,54 +192,12 @@ class InsightWebController extends Controller
         ]);
     }
 
-    /**
-     * Display insights filtered by category
-     */
-//    public function category($slug, Request $request)
-//    {
-//        $category = Category::where('slug', $slug)->firstOrFail();
-//
-//        // For better performance, we could modify this to use the service
-//        // But keeping it similar to your original implementation
-//        $insights = Insight::where('category_id', $category->id)
-//            ->with('category')
-//            ->get()
-//            ->map(function ($insight) {
-//                return [
-//                    'id' => $insight->id,
-//                    'judul' => $insight->judul,
-//                    'slug' => $insight->slug,
-//                    'isi' => $insight->isi,
-//                    'image_url' => $insight->image_url,
-//                    'penulis' => $insight->penulis,
-//                    'TanggalTerbit' => $insight->TanggalTerbit,
-//                    'category_id' => $insight->category_id,
-//                    'category_name' => $insight->category ? $insight->category->name : null,
-//                ];
-//            });
-//
-//        $categories = Category::withCount('insights')->get();
-//
-//        // Convert to collection for pagination
-//        $collection = collect($insights);
-//
-//        // Sort by publish date (newest first)
-//        $collection = $collection->sortByDesc('TanggalTerbit');
-//
-//        // Paginate the collection
-//        $paginatedInsights = $this->paginateCollection($collection, $request);
-//
-//        return view('insights.index', [
-//            'insights' => $paginatedInsights,
-//            'categories' => $categories,
-//            'currentCategory' => $category->name
-//        ]);
-//    }
-
-
     public function category($slug, Request $request)
     {
-        $category = Category::where('slug', $slug)->firstOrFail();
+        $category = Category::with('parent')
+            ->where('slug', $slug)
+            ->firstOrFail();
+
         // SEO for category pages
         $seoData = new SEOData(
             title: "Kategori: {$category->name}",
@@ -220,7 +207,18 @@ class InsightWebController extends Controller
 
         // For better performance, we could modify this to use the service
         // But keeping it similar to your original implementation
-        $insights = Insight::where('category_id', $category->id)
+        $insights = Insight::where(function($query) use ($category) {
+            // Get insights from this category
+            $query->where('category_id', $category->id);
+
+            // If this is a parent category, also include insights from subcategories
+            if (!$category->parent_id) {
+                $childIds = Category::where('parent_id', $category->id)->pluck('id');
+                if ($childIds->count() > 0) {
+                    $query->orWhereIn('category_id', $childIds);
+                }
+            }
+        })
             ->with('category')
             ->get()
             ->map(function ($insight) {
@@ -237,7 +235,15 @@ class InsightWebController extends Controller
                 ];
             });
 
-        $categories = Category::withCount('insights')->get();
+        // Get categories with children and counts
+        $categories = Category::withCount('insights')
+            ->with(['children' => function($query) {
+                $query->withCount('insights')->where('is_active', true)->orderBy('order');
+            }])
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get();
 
         // Convert to collection for pagination
         $collection = collect($insights);
@@ -248,15 +254,16 @@ class InsightWebController extends Controller
         // Paginate the collection
         $paginatedInsights = $this->paginateCollection($collection, $request);
 
-        // Return the dedicated category view instead of the index view
+        // Return the dedicated category view
         return view('insights.category', [
             'insights' => $paginatedInsights,
             'categories' => $categories,
             'currentCategory' => $category->name,
             'category' => $category, // Pass the full category model for additional info
-             'seoData' => $seoData
+            'seoData' => $seoData
         ]);
     }
+
     /**
      * Helper method to paginate collections
      * This allows us to paginate array data from the service

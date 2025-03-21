@@ -1,5 +1,5 @@
 /**
- * CategoryCrud.js - JavaScript for the Category Management Dashboard
+ * Enhanced CategoryCrud.js - JavaScript for the Category Management Dashboard with Subcategories
  */
 
 if (!window.location.pathname.includes('/admin/categories')) {
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return; // Exit early if we're not on the right page
     }
 
-    console.log('Initializing Category Management dashboard');
+    console.log('Initializing Category Management dashboard with subcategory support');
 
     // State
     let categories = [];
@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalPages = 1;
     let currentCategoryId = null;
     let currentCategoryName = null;
+    let viewMode = 'flat'; // 'flat' or 'hierarchical'
 
     // CSRF token setup for AJAX requests
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -46,6 +47,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search');
     if (searchInput) {
         searchInput.addEventListener('input', filterCategories);
+    }
+
+    const viewModeToggle = document.getElementById('view-mode-toggle');
+    if (viewModeToggle) {
+        viewModeToggle.addEventListener('change', function() {
+            viewMode = this.checked ? 'hierarchical' : 'flat';
+            renderCategories();
+        });
     }
 
     const prevPage = document.getElementById('prev-page');
@@ -73,6 +82,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (newCategoryBtn) {
         newCategoryBtn.addEventListener('click', () => {
             openEditorModal();
+        });
+    }
+
+    // New Subcategory Button
+    const newSubcategoryBtn = document.getElementById('new-subcategory-btn');
+    if (newSubcategoryBtn) {
+        newSubcategoryBtn.addEventListener('click', () => {
+            openSubcategorySelector();
         });
     }
 
@@ -153,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             if (!categoriesTableBody) return;
 
-            categoriesTableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading categories...</td></tr>';
+            categoriesTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading categories...</td></tr>';
 
             const response = await fetch('/api/categories');
             if (!response.ok) throw new Error('Failed to fetch categories');
@@ -163,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error fetching categories:', error);
             if (categoriesTableBody) {
-                categoriesTableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Error loading categories. Please try again.</td></tr>';
+                categoriesTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error loading categories. Please try again.</td></tr>';
             }
         }
     }
@@ -200,8 +217,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 description.toLowerCase().includes(searchQuery);
         });
 
+        // Organize categories based on view mode
+        let displayCategories = [];
+
+        if (viewMode === 'hierarchical') {
+            // In hierarchical mode, we only display parent categories
+            // and handle subcategories with expand/collapse
+            displayCategories = filteredCategories.filter(cat => !cat.parent_id);
+        } else {
+            // In flat mode, we display all categories
+            displayCategories = filteredCategories;
+        }
+
         // Calculate pagination
-        totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+        totalPages = Math.ceil(displayCategories.length / itemsPerPage);
         if (totalPages === 0) totalPages = 1;
 
         // Update pagination UI
@@ -210,70 +239,121 @@ document.addEventListener('DOMContentLoaded', function() {
         const pageEndElement = document.getElementById('page-end');
 
         if (totalCategoriesElement) {
-            totalCategoriesElement.textContent = filteredCategories.length;
+            totalCategoriesElement.textContent = displayCategories.length;
         }
 
         if (pageStartElement) {
-            pageStartElement.textContent = filteredCategories.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+            pageStartElement.textContent = displayCategories.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
         }
 
         if (pageEndElement) {
-            pageEndElement.textContent = Math.min(currentPage * itemsPerPage, filteredCategories.length);
+            pageEndElement.textContent = Math.min(currentPage * itemsPerPage, displayCategories.length);
         }
 
         // Render pagination
         renderPagination();
 
         // Slice for current page
-        const pageCategories = filteredCategories.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+        const pageCategories = displayCategories.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
         if (pageCategories.length === 0) {
-            categoriesTableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No categories found matching your filters</td></tr>';
+            categoriesTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No categories found matching your filters</td></tr>';
             return;
         }
 
         // Render categories
         pageCategories.forEach(category => {
-            const row = document.createElement('tr');
-            row.classList.add('hover:bg-gray-50');
-
-            const insightsCount = category.insights_count || 0;
-
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                        <div class="text-sm font-medium text-gray-900">${category.name}</div>
-                    </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${category.slug}
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-500">
-                    ${category.description || 'No description'}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${insightsCount}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div class="flex space-x-2">
-                        <button class="text-blue-600 hover:text-blue-900 edit-category" data-id="${category.id}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                        </button>
-                        <button class="text-red-600 hover:text-red-900 delete-category" data-id="${category.id}" data-name="${category.name}" data-insights="${insightsCount}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    </div>
-                </td>
-            `;
-
-            categoriesTableBody.appendChild(row);
+            renderCategoryRow(category);
         });
 
         // Add event listeners to buttons
+        addEventListeners();
+    }
+
+    // Render a single category row
+    function renderCategoryRow(category, level = 0) {
+        const row = document.createElement('tr');
+        row.classList.add('hover:bg-gray-50');
+        row.dataset.id = category.id;
+
+        if (category.parent_id) {
+            row.classList.add('subcategory');
+            row.dataset.parentId = category.parent_id;
+        }
+
+        const insightsCount = category.insights_count || 0;
+        const hasChildren = category.children && category.children.length > 0;
+
+        // Create indentation for hierarchy
+        let nameDisplay = category.name;
+        if (level > 0) {
+            nameDisplay = `${'— '.repeat(level)} ${category.name}`;
+        }
+
+        // Status classes
+        const statusClass = category.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    ${hasChildren && viewMode === 'hierarchical' ?
+            `<button class="mr-2 toggle-children" data-id="${category.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>` :
+            ''}
+                    <div class="text-sm font-medium text-gray-900">${nameDisplay}</div>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${category.slug}
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-500">
+                ${category.description || 'No description'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${insightsCount}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                    ${category.is_active ? 'Active' : 'Inactive'}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex space-x-2">
+                    <button class="text-green-600 hover:text-green-900 add-subcategory" data-id="${category.id}" title="Add Subcategory">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5zm5 1a1 1 0 00-1 1v3H6a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V7a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <button class="text-blue-600 hover:text-blue-900 edit-category" data-id="${category.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                    </button>
+                    <button class="text-red-600 hover:text-red-900 delete-category" data-id="${category.id}" data-name="${category.name}" data-insights="${insightsCount}" data-children="${hasChildren ? '1' : '0'}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        `;
+
+        categoriesTableBody.appendChild(row);
+
+        // If in hierarchical view, render children recursively
+        if (viewMode === 'hierarchical' && hasChildren) {
+            category.children.forEach(child => {
+                renderCategoryRow(child, level + 1);
+            });
+        }
+    }
+
+    // Add event listeners to category rows after rendering
+    function addEventListeners() {
+        // Edit category buttons
         document.querySelectorAll('.edit-category').forEach(button => {
             button.addEventListener('click', () => {
                 const categoryId = button.getAttribute('data-id');
@@ -281,14 +361,73 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
+        // Delete category buttons
         document.querySelectorAll('.delete-category').forEach(button => {
             button.addEventListener('click', () => {
                 const categoryId = button.getAttribute('data-id');
                 const categoryName = button.getAttribute('data-name');
                 const insightsCount = parseInt(button.getAttribute('data-insights') || '0');
-                openDeleteModal(categoryId, categoryName, insightsCount);
+                const hasChildren = button.getAttribute('data-children') === '1';
+                openDeleteModal(categoryId, categoryName, insightsCount, hasChildren);
             });
         });
+
+        // Add subcategory buttons
+        document.querySelectorAll('.add-subcategory').forEach(button => {
+            button.addEventListener('click', () => {
+                const parentId = button.getAttribute('data-id');
+                openEditorModal(null, parentId);
+            });
+        });
+
+        // Toggle children buttons (expand/collapse)
+        document.querySelectorAll('.toggle-children').forEach(button => {
+            button.addEventListener('click', () => {
+                const categoryId = button.getAttribute('data-id');
+                toggleChildren(categoryId, button);
+            });
+        });
+    }
+
+    // Toggle showing/hiding children categories
+    function toggleChildren(categoryId, button) {
+        const childRows = document.querySelectorAll(`tr.subcategory[data-parent-id="${categoryId}"]`);
+        const isExpanded = button.classList.contains('expanded');
+
+        if (isExpanded) {
+            // Collapse
+            childRows.forEach(row => {
+                row.classList.add('hidden');
+
+                // Also collapse any expanded children
+                const childId = row.dataset.id;
+                const childToggle = row.querySelector(`.toggle-children[data-id="${childId}"]`);
+                if (childToggle && childToggle.classList.contains('expanded')) {
+                    toggleChildren(childId, childToggle);
+                }
+            });
+
+            // Update button icon (rotate back)
+            button.classList.remove('expanded');
+            button.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            `;
+        } else {
+            // Expand
+            childRows.forEach(row => {
+                row.classList.remove('hidden');
+            });
+
+            // Update button icon (rotate)
+            button.classList.add('expanded');
+            button.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 transform rotate-180" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            `;
+        }
     }
 
     // Render pagination
@@ -348,20 +487,75 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Open parent category selector modal for new subcategory
+    function openSubcategorySelector() {
+        const modal = document.getElementById('parent-selector-modal');
+        const parentList = document.getElementById('parent-category-list');
+
+        if (!modal || !parentList) {
+            console.error('Required parent selector modal elements not found');
+            return;
+        }
+
+        // Clear previous list
+        parentList.innerHTML = '';
+
+        // Get parent categories
+        const parentCategories = categories.filter(cat => !cat.parent_id);
+
+        if (parentCategories.length === 0) {
+            parentList.innerHTML = '<div class="p-4 text-gray-500">No parent categories found. Create a parent category first.</div>';
+        } else {
+            // Create list items for each parent category
+            parentCategories.forEach(category => {
+                const item = document.createElement('div');
+                item.className = 'p-3 border-b hover:bg-gray-50 cursor-pointer flex items-center justify-between';
+                item.innerHTML = `
+                    <span>${category.name}</span>
+                    <span class="text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                `;
+
+                item.addEventListener('click', () => {
+                    closeModal(modal);
+                    openEditorModal(null, category.id);
+                });
+
+                parentList.appendChild(item);
+            });
+        }
+
+        // Show modal
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+    }
+
     // Open Editor Modal
-    async function openEditorModal(categoryId = null) {
+    async function openEditorModal(categoryId = null, parentId = null) {
         const modal = document.getElementById('category-editor-modal');
         const form = document.getElementById('category-form');
         const editorTitle = document.getElementById('editor-title');
         const formMethod = document.getElementById('form-method');
+        const parentIdInput = document.getElementById('parent_id');
+        const isActiveInput = document.getElementById('is_active');
+        const parentSection = document.getElementById('parent-category-section');
 
-        if (!modal || !form || !editorTitle || !formMethod) {
+        if (!modal || !form || !editorTitle || !formMethod || !parentIdInput || !isActiveInput || !parentSection) {
             console.error('Required editor modal elements not found');
             return;
         }
 
         // Reset form
         form.reset();
+
+        // Show parent category section by default
+        parentSection.classList.remove('hidden');
+
+        // Populate parent dropdown
+        populateParentDropdown(categoryId);
 
         if (categoryId) {
             // Edit mode - fetch data from API
@@ -378,8 +572,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const nameInput = document.getElementById('name');
                 const slugInput = document.getElementById('slug');
                 const descriptionInput = document.getElementById('description');
+                const orderInput = document.getElementById('order');
 
-                if (!formCategoryId || !nameInput || !slugInput || !descriptionInput) {
+                if (!formCategoryId || !nameInput || !slugInput || !descriptionInput || !orderInput) {
                     console.error('Form elements not found');
                     throw new Error('Form elements not found');
                 }
@@ -390,6 +585,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 slugInput.value = category.slug || '';
                 slugInput.dataset.autogenerated = 'false';
                 descriptionInput.value = category.description || '';
+                parentIdInput.value = category.parent_id || '';
+                isActiveInput.checked = category.is_active === undefined ? true : category.is_active;
+                orderInput.value = category.order || 0;
 
                 // Store current category ID for save operation
                 currentCategoryId = categoryId;
@@ -401,11 +599,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else {
             // Create mode
-            editorTitle.textContent = 'Create New Category';
+            editorTitle.textContent = parentId ? 'Create New Subcategory' : 'Create New Category';
             formMethod.value = 'POST';
 
             const formCategoryId = document.getElementById('form-category-id');
             const slugInput = document.getElementById('slug');
+            const orderInput = document.getElementById('order');
 
             if (formCategoryId) {
                 formCategoryId.value = '';
@@ -413,6 +612,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (slugInput) {
                 slugInput.dataset.autogenerated = 'true';
+            }
+
+            // Set parent ID if creating a subcategory
+            if (parentId) {
+                parentIdInput.value = parentId;
+
+                // Get parent category name for display
+                const parentCategory = categories.find(cat => cat.id == parentId);
+                const parentDisplay = document.getElementById('parent-category-display');
+
+                if (parentDisplay && parentCategory) {
+                    parentDisplay.textContent = parentCategory.name;
+                    // Hide dropdown as parent is pre-selected
+                    parentSection.classList.add('hidden');
+                }
+            } else {
+                parentIdInput.value = '';
+            }
+
+            // Set default active state
+            isActiveInput.checked = true;
+
+            // Default order to last position
+            if (orderInput) {
+                // Get max order value in same parent + 1
+                const maxOrder = parentId
+                    ? Math.max(...categories.filter(cat => cat.parent_id == parentId).map(cat => cat.order || 0), 0)
+                    : Math.max(...categories.filter(cat => !cat.parent_id).map(cat => cat.order || 0), 0);
+                orderInput.value = maxOrder + 1;
             }
 
             // Reset current category ID
@@ -432,13 +660,73 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     }
 
+    // Populate parent category dropdown
+    function populateParentDropdown(excludeCategoryId = null) {
+        const parentIdSelect = document.getElementById('parent_id');
+        if (!parentIdSelect) return;
+
+        // Clear current options except the empty first option
+        while (parentIdSelect.options.length > 1) {
+            parentIdSelect.remove(1);
+        }
+
+        // Get potential parent categories (exclude current category and its children to prevent circular references)
+        let potentialParents = categories;
+
+        if (excludeCategoryId) {
+            // Get all child IDs recursively to exclude them
+            const childIds = getChildCategoryIds(excludeCategoryId);
+            // Exclude self and all children
+            potentialParents = categories.filter(cat =>
+                cat.id != excludeCategoryId && !childIds.includes(cat.id)
+            );
+        }
+
+        // Add options
+        potentialParents.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+
+            // Add indentation for visual hierarchy
+            let prefix = '';
+            if (category.parent_id) {
+                const parent = categories.find(c => c.id == category.parent_id);
+                if (parent) {
+                    prefix = '— ';
+                }
+            }
+
+            option.textContent = prefix + category.name;
+            parentIdSelect.appendChild(option);
+        });
+    }
+
+    // Get all child category IDs recursively (to prevent circular references)
+    function getChildCategoryIds(categoryId) {
+        const childIds = [];
+
+        // Find direct children
+        const directChildren = categories.filter(cat => cat.parent_id == categoryId);
+
+        // Add their IDs
+        directChildren.forEach(child => {
+            childIds.push(child.id);
+            // Recursively add their children's IDs
+            const grandchildIds = getChildCategoryIds(child.id);
+            childIds.push(...grandchildIds);
+        });
+
+        return childIds;
+    }
+
     // Open Delete Confirmation Modal
-    function openDeleteModal(categoryId, categoryName, insightsCount) {
+    function openDeleteModal(categoryId, categoryName, insightsCount, hasChildren) {
         const modal = document.getElementById('delete-modal');
         const nameElement = document.getElementById('delete-category-name');
-        const warningElement = document.getElementById('category-has-insights');
+        const insightsWarningElement = document.getElementById('category-has-insights');
+        const childrenWarningElement = document.getElementById('category-has-children');
 
-        if (!modal || !nameElement || !warningElement) {
+        if (!modal || !nameElement || !insightsWarningElement || !childrenWarningElement) {
             console.error('Delete modal elements not found');
             return;
         }
@@ -449,9 +737,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Show warning if category has insights
         if (insightsCount > 0) {
-            warningElement.classList.remove('hidden');
+            insightsWarningElement.classList.remove('hidden');
         } else {
-            warningElement.classList.add('hidden');
+            insightsWarningElement.classList.add('hidden');
+        }
+
+        // Show warning if category has subcategories
+        if (hasChildren) {
+            childrenWarningElement.classList.remove('hidden');
+        } else {
+            childrenWarningElement.classList.add('hidden');
         }
 
         modal.classList.remove('opacity-0', 'pointer-events-none');
@@ -462,8 +757,9 @@ document.addEventListener('DOMContentLoaded', function() {
     async function saveCategory() {
         const form = document.getElementById('category-form');
         const formMethodElement = document.getElementById('form-method');
+        const isActiveCheckbox = document.getElementById('is_active');
 
-        if (!form || !formMethodElement) {
+        if (!form || !formMethodElement || !isActiveCheckbox) {
             console.error('Required form elements not found');
             return;
         }
@@ -471,6 +767,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData(form);
         const method = formMethodElement.value;
         const categoryId = document.getElementById('form-category-id').value;
+
+        // Handle boolean checkbox value properly
+        formData.set('is_active', isActiveCheckbox.checked ? '1' : '0');
 
         // Convert FormData to object
         const categoryData = {};

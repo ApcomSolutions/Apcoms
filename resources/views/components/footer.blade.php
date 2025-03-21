@@ -35,10 +35,11 @@
                     <a href="#" class="text-gray-300 hover:text-blue-400">
                         <i class="fab fa-linkedin text-xl"></i>
                     </a>
-                    <a href="#" class="text-gray-300 hover:text-pink-500">
+                    <a href="https://www.instagram.com/apcomsolution?igsh=ejNla2VjeDdwaWd5"
+                        class="text-gray-300 hover:text-pink-500">
                         <i class="fab fa-instagram text-xl"></i>
                     </a>
-                    <a href="#" class="text-gray-300 hover:text-gray-400">
+                    <a href="https://github.com/ApcomSolutions" class="text-gray-300 hover:text-gray-400">
                         <i class="fab fa-github text-xl"></i>
                     </a>
                 </div>
@@ -48,15 +49,9 @@
             <div>
                 <h3 class="text-lg font-semibold mb-4">Our Location</h3>
                 <div class="bg-gray-800 w-full h-64 rounded-lg overflow-hidden">
-                    <x-google-map
-                        id="footer-map"
-                        height="100%"
-                        lat="-6.938139"
-                        lng="107.666861"
-                        zoom="15"
+                    <x-google-map id="footer-map" height="100%" lat="-6.938139" lng="107.666861" zoom="15"
                         title="APCOM Solutions"
-                        address="Sanggar Kencana Utama No. 1C Sanggar Hurip Estate, Jatisari, Buahbatu, Soekarno Hatta, Kota Bandung, Jawa Barat"
-                    />
+                        address="Sanggar Kencana Utama No. 1C Sanggar Hurip Estate, Jatisari, Buahbatu, Soekarno Hatta, Kota Bandung, Jawa Barat" />
                 </div>
             </div>
         </div>
