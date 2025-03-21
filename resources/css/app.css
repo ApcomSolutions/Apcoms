@@ -11,14 +11,16 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-@media screen and (min-width: 1024px){
-    .zoom responsive{
-        zoom : 0.8;
+@layer components {
+    @media screen and (min-width: 1280px){
+        .zoom-responsive {
+            zoom: 0.9;
+        }
     }
-}
 
-@media screen and (min-width: 1280px){
-    .zoom responsive{
-        zoom : 1;
+    @media screen and (min-width: 1920px){
+        .zoom-responsive {
+        zoom: 1;
+        }
     }
 }

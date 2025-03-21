@@ -3,7 +3,7 @@
     <x-navbar></x-navbar>
 
     <!-- About Us Section dengan padding tambahan di kiri dan kanan -->
-    <div class="container mx-auto py-12 px-6 md:px-12 lg:px-24 mt-10">
+    <div class="zoom-responsive container mx-auto py-30 px-6 md:px-12 lg:px-24 mt-10">
         <div class="flex flex-col md:flex-row items-center justify-between gap-12">
             <!-- Bagian Kiri: About Us, Nama Perusahaan, dan Deskripsi -->
             <div class="w-full md:w-1/2 space-y-6">

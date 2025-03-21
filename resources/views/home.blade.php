@@ -2,7 +2,7 @@
     <x-navbar></x-navbar>
     {{-- Hero Section --}}
     <div
-        class="relative min-h-[80vh] flex items-center mt-10 py-50 justify-center px-6 md:px-12 overflow-hidden zoom-resposive">
+        class="zoom-responsive relative min-h-[80vh] flex items-center mt-10 py-75 justify-center px-6 md:px-12 overflow-hidden">
         <!-- Pola latar belakang dengan gradient dan shapes -->
         <div class="absolute inset-0 bg-gradient-to-br from-blue-100 via-white to-pink-50 zoom-resposive">
             {{-- <!-- Decorative shapes -->
